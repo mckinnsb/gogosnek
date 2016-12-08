@@ -11,11 +11,12 @@ To run, you will need:
 
 I recommend you build with Guard, using ruby.
 
-To install that, simply
+To install that, simply type ( assuming ruby is installed ):
 
     bundle install
 
-And to run:
+And to run guard, simply type:
+
     bundle exec guard
 
 Guard will watch for changes to all your files and run the tests. If the tests pass, it will build the JS and executable,
