@@ -100,6 +100,16 @@ func (snake *Snake) GetTail() <-chan Vector2 {
 
 }
 
+func (snake *Snake) IsColliding(edible Edible) bool {
+	me := Rect{snake.position, snake.position.Add(Vector2{8, 8})}
+	other := Rect{
+		edible.position(),
+		edible.position().Add(edible.size())}
+
+	return me.CollidesWith(other)
+
+}
+
 //eat an edible, make snake strong
 func (snake *Snake) Eat(eatme Edible) {
 	snake.length += eatme.amount()
@@ -132,6 +142,7 @@ func (snake *Snake) Start(position Vector2) {
 
 //update snek, move him, add new position to positions list
 //and return
+
 func (snake *Snake) Update() {
 	newPosition := snake.direction.Multiply(snake.speed)
 	snake.position = snake.position.Add(newPosition).ClampToWindow()

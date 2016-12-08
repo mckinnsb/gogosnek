@@ -40,15 +40,6 @@ func (v Vector2) ClampToWindow() Vector2 {
 			v.y += GameHeight
 		}
 
-		//v.y = GameHeight + v.y
-
-		/**
-		case v.x > GameWidth:
-			v.x = Math.Mod(v.x, GameWidth)
-
-		case v.y > GameHeight:
-			v.y = Math.Mod(v.y, GameWidth)
-			**/
 	}
 
 	return v
@@ -67,6 +58,7 @@ func MultiplyVector(v Vector2, scale float64) Vector2 {
 	return v
 }
 
+//reverse the vector, swapping x and y
 func (v Vector2) Reverse() Vector2 {
 	return Vector2{v.y, v.x}
 }
