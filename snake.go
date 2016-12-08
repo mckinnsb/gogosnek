@@ -123,7 +123,7 @@ func (snake *Snake) Start(position Vector2) {
 	snake.cursor = 0
 
 	//we create this just once, because it is a heavy struct
-	snake.avatar, _ = ebiten.NewImage(16, 16, ebiten.FilterNearest)
+	snake.avatar, _ = ebiten.NewImage(8, 8, ebiten.FilterNearest)
 
 	//and we do this just once, because it's fairly expensive
 	snake.avatar.Fill(color.White)
