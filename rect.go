@@ -6,8 +6,7 @@ package main
 //rectangle
 
 type Rect struct {
-	start Vector2
-	end   Vector2
+	start, end Vector2
 }
 
 func (rect Rect) CollidesWith(other Rect) bool {
