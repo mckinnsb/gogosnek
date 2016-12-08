@@ -1,5 +1,10 @@
 package main
 
+import (
+	"github.com/hajimehoshi/ebiten"
+	"image/color"
+)
+
 //start length of snek, don't use this for calculations,
 //just starting snek
 const startLength = 20
@@ -10,9 +15,21 @@ const maxLength = 200
 
 //struct for snek
 type Snake struct {
+
+	//the image, this thing is heavy, so, careful
+	//when you deref
+	avatar *ebiten.Image
+
+	//the position and direction of snek
 	position, direction Vector2
-	positions           []Vector2
-	cursor              int
+
+	//the positions of snek
+	positions []Vector2
+
+	//the cursor of snek, or where his head position is in positions,
+	//we form his tail from length of positions, the rest is considered
+	//garbage
+	cursor int
 
 	//speed in pixels/update
 	speed float64
@@ -88,13 +105,13 @@ func (snake *Snake) Eat(eatme Edible) {
 	snake.length += eatme.amount()
 }
 
-/**
-maybe if we do resizable tails? will have to deal with circular structure
-func (snake *Snake) ResizeTail() {
-}
-**/
+//start snek,
+//called by game init function
 
-//start snek
+//this might be implemented by an interface,
+//if i had more mobile objects in the game,
+//right now its just snek
+
 func (snake *Snake) Start(position Vector2) {
 
 	snake.length = startLength
@@ -104,6 +121,12 @@ func (snake *Snake) Start(position Vector2) {
 	snake.positions[0] = snake.position
 
 	snake.cursor = 0
+
+	//we create this just once, because it is a heavy struct
+	snake.avatar, _ = ebiten.NewImage(16, 16, ebiten.FilterNearest)
+
+	//and we do this just once, because it's fairly expensive
+	snake.avatar.Fill(color.White)
 
 }
 

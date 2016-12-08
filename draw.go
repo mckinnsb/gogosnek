@@ -31,23 +31,11 @@ func Draw(game GameState, screen *ebiten.Image) error {
 
 func DrawSnake(snake Snake, screen *ebiten.Image) error {
 
-	//we could optimize this by only creating this image
-	//once
-
-	//these have to be outside the loop, because
-	//NewImage creates a nxn array, and guess how espensive that is
-	square, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
-
-	//especially when you do this, and it goes over every element again
-	square.Fill(color.White)
-
 	for position := range snake.GetTail() {
-
 		opts := &ebiten.DrawImageOptions{}
 		opts.GeoM.Translate(position.x, position.y)
 
-		screen.DrawImage(square, opts)
-
+		screen.DrawImage(snake.avatar, opts)
 	}
 
 	return nil
