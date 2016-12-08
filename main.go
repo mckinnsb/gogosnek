@@ -3,6 +3,9 @@ package main
 
 import "github.com/hajimehoshi/ebiten"
 
+const GameWidth float64 = 320
+const GameHeight float64 = 240
+
 type GameState struct {
 	snake Snake
 	input InputHandler
@@ -33,7 +36,18 @@ func (game *GameState) Update(screen *ebiten.Image) error {
 }
 
 func main() {
-	game := GameState{Snake{direction: Vector2{1, 0}, speed: 2}, InputHandler{}}
-	game.snake.Start(Vector2{320 / 2, 240 / 2})
-	ebiten.Run(game.Update, 320, 240, 2, "Go Go Snek!")
+
+	game := GameState{
+		Snake{direction: Vector2{1, 0}, speed: 2},
+		InputHandler{}}
+
+	game.snake.Start(Vector2{GameWidth / 2, GameHeight / 2})
+
+	ebiten.Run(
+		game.Update,
+		int(GameWidth),
+		int(GameHeight),
+		2,
+		"Go Go Snek!")
+
 }

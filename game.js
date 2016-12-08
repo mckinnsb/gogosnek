@@ -3050,7 +3050,7 @@ $packages["io"] = (function() {
 	return $pkg;
 })();
 $packages["math"] = (function() {
-	var $pkg = {}, $init, js, arrayType, arrayType$1, arrayType$2, structType, arrayType$3, math, buf, pow10tab, Ceil, Cos, Sin, Sincos, init, Float32bits, Float64bits, init$1;
+	var $pkg = {}, $init, js, arrayType, arrayType$1, arrayType$2, structType, arrayType$3, math, buf, pow10tab, Ceil, Cos, Mod, Sin, Sincos, init, Float32bits, Float64bits, init$1;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	arrayType = $arrayType($Uint32, 2);
 	arrayType$1 = $arrayType($Float32, 2);
@@ -3067,6 +3067,11 @@ $packages["math"] = (function() {
 		return $parseFloat(math.cos(x));
 	};
 	$pkg.Cos = Cos;
+	Mod = function(x, y) {
+		var $ptr, x, y;
+		return $parseFloat($mod(x, y));
+	};
+	$pkg.Mod = Mod;
 	Sin = function(x) {
 		var $ptr, x;
 		return $parseFloat(math.sin(x));
@@ -26419,9 +26424,10 @@ $packages["github.com/hajimehoshi/ebiten"] = (function() {
 	return $pkg;
 })();
 $packages["github.com/mckinnsb/gogosnek"] = (function() {
-	var $pkg = {}, $init, ebiten, color, Edible, InputHandler, GameState, Snake, Vector2, arrayType, arrayType$1, sliceType, ptrType, sliceType$1, ptrType$2, ptrType$3, chanType, ptrType$4, Draw, DrawSnake, main, AddVectors, MultiplyVector;
+	var $pkg = {}, $init, ebiten, color, math, Edible, InputHandler, GameState, Snake, Vector2, arrayType, arrayType$1, sliceType, ptrType, sliceType$1, ptrType$2, ptrType$3, chanType, ptrType$4, Draw, DrawSnake, main, AddVectors, MultiplyVector;
 	ebiten = $packages["github.com/hajimehoshi/ebiten"];
 	color = $packages["image/color"];
+	math = $packages["math"];
 	Edible = $pkg.Edible = $newType(8, $kindInterface, "main.Edible", true, "github.com/mckinnsb/gogosnek", true, null);
 	InputHandler = $pkg.InputHandler = $newType(0, $kindStruct, "main.InputHandler", true, "github.com/mckinnsb/gogosnek", true, function(inputDown_) {
 		this.$val = this;
@@ -26677,7 +26683,7 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		var $ptr, newPosition, snake;
 		snake = this;
 		newPosition = $clone(snake.direction.Multiply(snake.speed), Vector2);
-		Vector2.copy(snake.position, snake.position.Add(newPosition));
+		Vector2.copy(snake.position, snake.position.Add(newPosition).ClampToWindow());
 		snake.AddPosition(snake.position);
 		return;
 	};
@@ -26698,6 +26704,23 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		return v1;
 	};
 	$pkg.AddVectors = AddVectors;
+	Vector2.ptr.prototype.ClampToWindow = function() {
+		var $ptr, v;
+		v = $clone(this, Vector2);
+		if (v.x < 0 || v.x > 320) {
+			v.x = math.Mod(v.x, 320);
+			if (v.x < 0) {
+				v.x = v.x + (320);
+			}
+		} else if (v.y < 0 || v.y > 240) {
+			v.y = math.Mod(v.y, 240);
+			if (v.y < 0) {
+				v.y = v.y + (240);
+			}
+		}
+		return v;
+	};
+	Vector2.prototype.ClampToWindow = function() { return this.$val.ClampToWindow(); };
 	Vector2.ptr.prototype.Multiply = function(scale) {
 		var $ptr, scale, v;
 		v = $clone(this, Vector2);
@@ -26721,7 +26744,7 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 	ptrType$3.methods = [{prop: "ProcessInput", name: "ProcessInput", pkg: "", typ: $funcType([ptrType$2], [$error], false)}];
 	ptrType$2.methods = [{prop: "HandleMovement", name: "HandleMovement", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "Update", name: "Update", pkg: "", typ: $funcType([ptrType], [$error], false)}];
 	ptrType$4.methods = [{prop: "AddPosition", name: "AddPosition", pkg: "", typ: $funcType([Vector2], [], false)}, {prop: "GetTail", name: "GetTail", pkg: "", typ: $funcType([], [chanType], false)}, {prop: "Eat", name: "Eat", pkg: "", typ: $funcType([Edible], [], false)}, {prop: "Start", name: "Start", pkg: "", typ: $funcType([Vector2], [], false)}, {prop: "Update", name: "Update", pkg: "", typ: $funcType([], [], false)}];
-	Vector2.methods = [{prop: "Add", name: "Add", pkg: "", typ: $funcType([Vector2], [Vector2], false)}, {prop: "Multiply", name: "Multiply", pkg: "", typ: $funcType([$Float64], [Vector2], false)}, {prop: "Reverse", name: "Reverse", pkg: "", typ: $funcType([], [Vector2], false)}];
+	Vector2.methods = [{prop: "Add", name: "Add", pkg: "", typ: $funcType([Vector2], [Vector2], false)}, {prop: "ClampToWindow", name: "ClampToWindow", pkg: "", typ: $funcType([], [Vector2], false)}, {prop: "Multiply", name: "Multiply", pkg: "", typ: $funcType([$Float64], [Vector2], false)}, {prop: "Reverse", name: "Reverse", pkg: "", typ: $funcType([], [Vector2], false)}];
 	Edible.init([{prop: "amount", name: "amount", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [$Int], false)}]);
 	InputHandler.init("github.com/mckinnsb/gogosnek", [{prop: "inputDown", name: "inputDown", exported: false, typ: $Bool, tag: ""}]);
 	GameState.init("github.com/mckinnsb/gogosnek", [{prop: "snake", name: "snake", exported: false, typ: Snake, tag: ""}, {prop: "input", name: "input", exported: false, typ: InputHandler, tag: ""}]);
@@ -26732,12 +26755,13 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		$r = ebiten.$init(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = color.$init(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		/* */ if ($pkg === $mainPkg) { $s = 3; continue; }
-		/* */ $s = 4; continue;
-		/* if ($pkg === $mainPkg) { */ case 3:
-			$r = main(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = math.$init(); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ if ($pkg === $mainPkg) { $s = 4; continue; }
+		/* */ $s = 5; continue;
+		/* if ($pkg === $mainPkg) { */ case 4:
+			$r = main(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 			$mainFinished = true;
-		/* } */ case 4:
+		/* } */ case 5:
 		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$pkg.$init = $init;

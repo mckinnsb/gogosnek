@@ -134,7 +134,7 @@ func (snake *Snake) Start(position Vector2) {
 //and return
 func (snake *Snake) Update() {
 	newPosition := snake.direction.Multiply(snake.speed)
-	snake.position = snake.position.Add(newPosition)
+	snake.position = snake.position.Add(newPosition).ClampToWindow()
 	snake.AddPosition(snake.position)
 	return
 }
