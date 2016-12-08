@@ -27392,6 +27392,9 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		snake = this;
 		_r = eatme.amount(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		snake.length = snake.length + (_r) >> 0;
+		if (snake.length > 200) {
+			snake.length = 200;
+		}
 		$s = -1; return;
 		return;
 		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.Eat }; } $f.$ptr = $ptr; $f._r = _r; $f.eatme = eatme; $f.snake = snake; $f.$s = $s; $f.$r = $r; return $f;

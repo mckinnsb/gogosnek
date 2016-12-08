@@ -113,6 +113,10 @@ func (snake *Snake) IsColliding(edible Edible) bool {
 //eat an edible, make snake strong
 func (snake *Snake) Eat(eatme Edible) {
 	snake.length += eatme.amount()
+
+	if snake.length > maxLength {
+		snake.length = maxLength
+	}
 }
 
 //start snek,
