@@ -45,6 +45,10 @@ func DrawObject(drawable Drawable, screen *ebiten.Image) {
 		return
 	}
 
+	if drawable.avatar() == nil {
+		return
+	}
+
 	position := drawable.position()
 
 	opts := &ebiten.DrawImageOptions{}

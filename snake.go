@@ -9,17 +9,22 @@ import (
 //do not use it for calculations!
 const maxLength = 400
 
-//how big is the snake, in virtual pixels
+//how big can the snake get before we resize the level?
 //(virtual because it is multiplied by the scale factor given to ebiten)
-const snakeSize = 8
+
+const maxSize = 32
 
 //start length of snek, don't use this for calculations,
 //just starting snek
+
 const startLength = 20
 
 //struct for snek
 // the hero of the day
 type Snake struct {
+
+	//are you advanced snek?
+	advanced bool
 
 	//the image, this thing is heavy, so, careful
 	//when you deref
@@ -29,7 +34,7 @@ type Snake struct {
 	position, direction Vector2
 
 	//the positions of snek
-	positions []Vector2
+	positions []SnakeSegment
 
 	//the cursor of snek, or where his head position is in positions,
 	//we form his tail from length of positions, the rest is considered
@@ -42,11 +47,16 @@ type Snake struct {
 	//this is not a length in pixels, but rather,
 	//a length in positions ( can be thought of as length in pixels = speed*length )
 	length int
+
+	//this is the width of the snek
+	size float64
 }
 
 type SnakeSegment struct {
 	snake  *Snake
 	center Vector2
+	size   float64
+	image  *ebiten.Image
 }
 
 type Tail chan Vector2
@@ -60,18 +70,34 @@ func (snake *Snake) AddPosition(position Vector2) {
 		snake.cursor = 0
 	}
 
-	snake.positions[snake.cursor] = position
+	snake.positions[snake.cursor] = SnakeSegment{snake, position, snake.size, snake.avatar}
 
 }
 
 func (snake *Snake) Collider() Rect {
-	return GetSnakeCollider(snake.position)
+	return snake.GetColliderAt(snake.position)
 }
 
 //eat a thing you can eat, make snake strong
 func (snake *Snake) Eat(eatme Edible) {
 
 	oldLength := snake.length
+
+	if snake.advanced && snake.size < maxSize {
+
+		snake.size += 2
+
+		imageSize := int(snake.size)
+
+		//make a new image
+		snake.avatar, _ = ebiten.NewImage(imageSize,
+			imageSize,
+			ebiten.FilterNearest)
+
+		//fill again
+		snake.avatar.Fill(color.White)
+
+	}
 
 	snake.length += eatme.amount()
 
@@ -101,14 +127,14 @@ func (snake *Snake) Eat(eatme Edible) {
 //are you eating your own tail, snake?
 func (snake *Snake) EatingTail() bool {
 
-	remainder := snake.GetTail().Skip(snakeSize + 1)
+	remainder := snake.GetTail().Skip(int(snake.size) + 1)
 	eatingSelf := false
 
 	head := snake.Collider()
 
 	for suspect := range remainder {
 
-		rect := GetSnakeCollider(suspect)
+		rect := snake.GetColliderAt(suspect)
 
 		if rect.CollidesWith(head) {
 			eatingSelf = true
@@ -133,9 +159,14 @@ func (snake *Snake) GetDrawTail() DrawTail {
 
 	out := make(DrawTail, snake.length)
 
-	for segment := range snake.GetTail() {
-		drawSegment := SnakeSegment{snake, segment}
-		out <- drawSegment
+	beginning, ending := snake.GetSegments()
+
+	for i := len(beginning) - 1; i >= 0; i-- {
+		out <- beginning[i]
+	}
+
+	for i := len(ending) - 1; i >= 0; i-- {
+		out <- ending[i]
 	}
 
 	close(out)
@@ -157,11 +188,11 @@ func (snake *Snake) GetMyTail() MyTail {
 	beginning, ending := snake.GetSegments()
 
 	for i := len(beginning) - 1; i >= 0; i-- {
-		out <- &beginning[i]
+		out <- &(beginning[i].center)
 	}
 
 	for i := len(ending) - 1; i >= 0; i-- {
-		out <- &ending[i]
+		out <- &(ending[i].center)
 	}
 
 	close(out)
@@ -174,7 +205,7 @@ func (snake *Snake) GetMyTail() MyTail {
 //keep in mind the end *might* be a zero slice,
 //the beginning will always be at least cap1
 
-func (snake *Snake) GetSegments() (beginning, end []Vector2) {
+func (snake *Snake) GetSegments() (beginning, end []SnakeSegment) {
 
 	//this is also "diff", and is used for calcuating
 	//the tail end
@@ -207,9 +238,9 @@ func (snake *Snake) GetSegments() (beginning, end []Vector2) {
 
 }
 
-func GetSnakeCollider(position Vector2) Rect {
-	offset := position.Add(Vector2{-snakeSize / 2, -snakeSize / 2})
-	return Rect{offset, offset.Add(Vector2{snakeSize, snakeSize})}
+func (snake *Snake) GetColliderAt(position Vector2) Rect {
+	offset := position.Add(Vector2{-snake.size / 2, -snake.size / 2})
+	return Rect{offset, offset.Add(Vector2{snake.size, snake.size})}
 }
 
 //this returns a channel that is an "enumerator" over
@@ -225,11 +256,11 @@ func (snake *Snake) GetTail() Tail {
 	beginning, ending := snake.GetSegments()
 
 	for i := len(beginning) - 1; i >= 0; i-- {
-		out <- beginning[i]
+		out <- beginning[i].center
 	}
 
 	for i := len(ending) - 1; i >= 0; i-- {
-		out <- ending[i]
+		out <- ending[i].center
 	}
 
 	close(out)
@@ -255,19 +286,28 @@ func (snake *Snake) Start(position Vector2) {
 
 	snake.length = startLength
 
-	snake.positions = make([]Vector2, maxLength)
+	snake.positions = make([]SnakeSegment, maxLength)
 	snake.position = position
-	snake.positions[0] = snake.position
 
 	snake.cursor = 0
 
-	//we create this just once, because it is a heavy struct
-	snake.avatar, _ = ebiten.NewImage(snakeSize,
-		snakeSize,
+	snake.size = 8
+
+	//we create this just once per scale, because it is a heavy struct
+	//we create it once, and then we display parts of it
+	//to simulate the scale. since the snake is just a square
+	//this doesn't matter
+
+	imageSize := int(snake.size)
+
+	snake.avatar, _ = ebiten.NewImage(imageSize,
+		imageSize,
 		ebiten.FilterNearest)
 
 	//and we do this just once, because it's fairly expensive
 	snake.avatar.Fill(color.White)
+
+	snake.positions[0] = SnakeSegment{snake, snake.position, snake.size, snake.avatar}
 
 }
 
@@ -282,11 +322,11 @@ func (snake *Snake) Update() {
 }
 
 func (seg SnakeSegment) avatar() *ebiten.Image {
-	return seg.snake.avatar
+	return seg.image
 }
 
 func (seg SnakeSegment) position() Vector2 {
-	return seg.center.Add(Vector2{-snakeSize / 2, -snakeSize / 2})
+	return seg.center.Add(Vector2{-seg.size / 2, -seg.size / 2})
 }
 
 //this function skips num entries and returns itself

@@ -12,7 +12,12 @@ func TestGetTailOverBoundry(t *testing.T) {
 	snek.length = 3
 	snek.cursor = 0
 
-	snek.positions = []Vector2{{1, 1}, {}, {}, {3, 3}, {2, 2}}
+	snek.positions = []SnakeSegment{
+		{center: Vector2{1, 1}},
+		{center: Vector2{}},
+		{center: Vector2{}},
+		{center: Vector2{3, 3}},
+		{center: Vector2{2, 2}}}
 
 	tail := snek.GetTail()
 
@@ -30,8 +35,12 @@ func TestGetTailSimple(t *testing.T) {
 	snek := Snake{}
 	snek.length = 3
 	snek.cursor = 3
-
-	snek.positions = []Vector2{{}, {3, 3}, {2, 2}, {1, 1}, {}}
+	snek.positions = []SnakeSegment{
+		{center: Vector2{}},
+		{center: Vector2{3, 3}},
+		{center: Vector2{2, 2}},
+		{center: Vector2{1, 1}},
+		{center: Vector2{}}}
 
 	tail := snek.GetTail()
 
@@ -50,7 +59,7 @@ func TestTailEndsAfterLength(t *testing.T) {
 	snek.length = 3
 	snek.cursor = 3
 
-	snek.positions = []Vector2{{}, {}, {}, {}, {}}
+	snek.positions = []SnakeSegment{{}, {}, {}, {}, {}}
 
 	tail := snek.GetTail()
 
@@ -129,14 +138,24 @@ func TestEatGrow(t *testing.T) {
 
 	snake := Snake{}
 
-	snake.positions = []Vector2{{1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}}
+	snake.positions = []SnakeSegment{
+		{center: Vector2{1, 1}},
+		{center: Vector2{2, 2}},
+		{center: Vector2{3, 3}},
+		{center: Vector2{4, 4}},
+		{center: Vector2{5, 5}}}
 
 	snake.cursor = 3
 	snake.length = 3
 
 	snake.Eat(Snack{})
 
-	expected := []Vector2{{2, 2}, {2, 2}, {3, 3}, {4, 4}, {5, 5}}
+	expected := []SnakeSegment{
+		{center: Vector2{2, 2}},
+		{center: Vector2{2, 2}},
+		{center: Vector2{3, 3}},
+		{center: Vector2{4, 4}},
+		{center: Vector2{5, 5}}}
 
 	if !reflect.DeepEqual(expected, snake.positions) {
 		t.Error("eating did not set the new tail segment to the last tail segment's length")
