@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
@@ -17,6 +18,7 @@ type GameState struct {
 	ended      bool
 	ticker     int
 	tick       int
+	score      int
 	endMessage string
 }
 
@@ -56,13 +58,14 @@ func (game *GameState) Update(screen *ebiten.Image) error {
 
 	if game.snake.EatingTail() {
 		//we will do a score later
-		game.End("Game Over!")
+		game.End(fmt.Sprintf("Game Over! Score: %v", game.score))
 	}
 
 	//this might be in a collision handler that tracks
 	//all edibles, but for now this is easiest
 	if game.snake.IsColliding(game.apple) {
 		game.snake.Eat(game.apple)
+		game.score += 1
 		game.apple = nil
 	}
 
@@ -81,14 +84,10 @@ func (game *GameState) Update(screen *ebiten.Image) error {
 func main() {
 
 	game := GameState{
-		Snake{direction: Vector2{1, 0}, speed: 2},
-		InputHandler{},
-		nil,
-		Chef{},
-		false,
-		1,
-		0,
-		""}
+		snake:  Snake{direction: Vector2{1, 0}, speed: 2},
+		input:  InputHandler{},
+		chef:   Chef{},
+		ticker: 1}
 
 	game.chef.Start()
 	game.snake.Start(Vector2{GameWidth / 2, GameHeight / 2})
