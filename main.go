@@ -1,16 +1,26 @@
 // the main loop and input handling
 package main
 
-import "github.com/hajimehoshi/ebiten"
+import (
+	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
+)
 
 const GameWidth float64 = 320
 const GameHeight float64 = 240
 
 type GameState struct {
-	snake Snake
-	input InputHandler
-	apple Edible
-	chef  Chef
+	snake      Snake
+	input      InputHandler
+	apple      Edible
+	chef       Chef
+	ended      bool
+	endMessage string
+}
+
+func (game *GameState) End(msg string) {
+	game.ended = true
+	game.endMessage = msg
 }
 
 func (game *GameState) Update(screen *ebiten.Image) error {
@@ -31,6 +41,11 @@ func (game *GameState) Update(screen *ebiten.Image) error {
 
 	//handled in snake.go
 	game.snake.Update()
+
+	if game.snake.EatingTail() {
+		//we will do a score later
+		game.End("Game Over!")
+	}
 
 	//this might be in a collision handler that tracks
 	//all edibles, but for now this is easiest
@@ -57,13 +72,28 @@ func main() {
 		Snake{direction: Vector2{1, 0}, speed: 2},
 		InputHandler{},
 		nil,
-		Chef{}}
+		Chef{},
+		false,
+		""}
 
 	game.chef.Start()
 	game.snake.Start(Vector2{GameWidth / 2, GameHeight / 2})
 
+	updateFunction := func(screen *ebiten.Image) error {
+
+		if game.ended {
+			//we will do a score later
+			ebitenutil.DebugPrint(screen, game.endMessage)
+		} else {
+			game.Update(screen)
+		}
+
+		return nil
+
+	}
+
 	ebiten.Run(
-		game.Update,
+		updateFunction,
 		int(GameWidth),
 		int(GameHeight),
 		2,

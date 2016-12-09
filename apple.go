@@ -6,7 +6,7 @@ import (
 )
 
 const appleSize int = 8
-const appleNutrition int = 10
+const appleNutrition int = 20
 
 type Edible interface {
 	amount() int

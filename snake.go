@@ -5,13 +5,19 @@ import (
 	"image/color"
 )
 
-//start length of snek, don't use this for calculations,
-//just starting snek
-const startLength = 20
+type Tail chan Vector2
 
 //this is only used in creating the storage array,
 //do not use it for calculations!
-const maxLength = 200
+const maxLength = 400
+
+//how big is the snake, in virtual pixels
+//(virtual because it is multiplied by the scale factor given to ebiten)
+const snakeSize = 8
+
+//start length of snek, don't use this for calculations,
+//just starting snek
+const startLength = 20
 
 //struct for snek
 type Snake struct {
@@ -50,12 +56,38 @@ func (snake *Snake) AddPosition(position Vector2) {
 
 }
 
+func (snake *Snake) EatingTail() bool {
+
+	remainder := snake.GetTail().Skip(snakeSize + 1)
+	eatingSelf := false
+
+	head := MakeSnakeRect(snake.position)
+
+	for suspect := range remainder {
+
+		rect := MakeSnakeRect(suspect)
+
+		if rect.CollidesWith(head) {
+			eatingSelf = true
+			break
+		}
+
+	}
+
+	return eatingSelf
+
+}
+
+func MakeSnakeRect(position Vector2) Rect {
+	return Rect{position, position.Add(Vector2{snakeSize, snakeSize})}
+}
+
 //this returns a channel that is an "enumerator" over
 //the past positions recorded by the snake. we return
 //a number of positions equal to the snakes length,
 //which is not a length in pixels
 
-func (snake *Snake) GetTail() <-chan Vector2 {
+func (snake *Snake) GetTail() Tail {
 
 	//we buffer so we don't have to make a goroutine
 	out := make(chan Vector2, snake.length)
@@ -137,7 +169,9 @@ func (snake *Snake) Start(position Vector2) {
 	snake.cursor = 0
 
 	//we create this just once, because it is a heavy struct
-	snake.avatar, _ = ebiten.NewImage(8, 8, ebiten.FilterNearest)
+	snake.avatar, _ = ebiten.NewImage(snakeSize,
+		snakeSize,
+		ebiten.FilterNearest)
 
 	//and we do this just once, because it's fairly expensive
 	snake.avatar.Fill(color.White)
@@ -152,4 +186,26 @@ func (snake *Snake) Update() {
 	snake.position = snake.position.Add(newPosition).ClampToWindow()
 	snake.AddPosition(snake.position)
 	return
+}
+
+func (tail Tail) Skip(num int) Tail {
+
+	nothingLeft := false
+
+	for i := 0; i < num; i++ {
+		_, result := <-tail
+		if !result {
+			nothingLeft = true
+			break
+		}
+	}
+
+	if nothingLeft {
+		empty := make(Tail)
+		close(empty)
+		return empty
+	}
+
+	return tail
+
 }
