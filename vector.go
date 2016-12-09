@@ -31,15 +31,18 @@ func (v Vector2) ClampToWindow() Vector2 {
 	case v.x < 0 || v.x > GameWidth:
 		v.x = math.Mod(v.x, GameWidth)
 		if v.x < 0 {
-			v.x += GameWidth
+			v.x += GameWidth + 1
+		} else {
+			v.x += -1
 		}
 
 	case v.y < 0 || v.y > GameHeight:
 		v.y = math.Mod(v.y, GameHeight)
 		if v.y < 0 {
-			v.y += GameHeight
+			v.y += GameHeight + 1
+		} else {
+			v.y += -1
 		}
-
 	}
 
 	return v

@@ -121,8 +121,8 @@ func (s Snack) position() Vector2 {
 	return Vector2{0, 0}
 }
 
-func (s Snack) size() Vector2 {
-	return Vector2{2, 2}
+func (s Snack) Collider() Rect {
+	return Rect{}
 }
 
 func TestEatGrow(t *testing.T) {

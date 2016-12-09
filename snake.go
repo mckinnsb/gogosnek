@@ -44,8 +44,14 @@ type Snake struct {
 	length int
 }
 
+type SnakeSegment struct {
+	snake  *Snake
+	center Vector2
+}
+
 type Tail chan Vector2
 type MyTail chan *Vector2
+type DrawTail chan Drawable
 
 func (snake *Snake) AddPosition(position Vector2) {
 
@@ -58,8 +64,11 @@ func (snake *Snake) AddPosition(position Vector2) {
 
 }
 
-//eat a thing you can eat, make snake strong
+func (snake *Snake) Collider() Rect {
+	return GetSnakeCollider(snake.position)
+}
 
+//eat a thing you can eat, make snake strong
 func (snake *Snake) Eat(eatme Edible) {
 
 	oldLength := snake.length
@@ -89,16 +98,17 @@ func (snake *Snake) Eat(eatme Edible) {
 
 }
 
+//are you eating your own tail, snake?
 func (snake *Snake) EatingTail() bool {
 
 	remainder := snake.GetTail().Skip(snakeSize + 1)
 	eatingSelf := false
 
-	head := MakeSnakeRect(snake.position)
+	head := snake.Collider()
 
 	for suspect := range remainder {
 
-		rect := MakeSnakeRect(suspect)
+		rect := GetSnakeCollider(suspect)
 
 		if rect.CollidesWith(head) {
 			eatingSelf = true
@@ -108,6 +118,54 @@ func (snake *Snake) EatingTail() bool {
 	}
 
 	return eatingSelf
+
+}
+
+//this returns a channel that is an "enumerator" that
+//decorates the tail positions as drawable objects
+
+//this version of the class has no skip function
+//because you must draw all of the tail, or at
+//least im not going to make that easy for me to
+//mess myself up on
+
+func (snake *Snake) GetDrawTail() DrawTail {
+
+	out := make(DrawTail, snake.length)
+
+	for segment := range snake.GetTail() {
+		drawSegment := SnakeSegment{snake, segment}
+		out <- drawSegment
+	}
+
+	close(out)
+	return out
+
+}
+
+//this returns a channel that is an "enumerator" over
+//the past positions - but as pointers
+//
+//this is for modifying the tail, removing positions,
+//etc
+
+func (snake *Snake) GetMyTail() MyTail {
+
+	//we buffer so we don't have to make a goroutine
+	out := make(MyTail, snake.length)
+
+	beginning, ending := snake.GetSegments()
+
+	for i := len(beginning) - 1; i >= 0; i-- {
+		out <- &beginning[i]
+	}
+
+	for i := len(ending) - 1; i >= 0; i-- {
+		out <- &ending[i]
+	}
+
+	close(out)
+	return out
 
 }
 
@@ -149,30 +207,9 @@ func (snake *Snake) GetSegments() (beginning, end []Vector2) {
 
 }
 
-//this returns a channel that is an "enumerator" over
-//the past positions - but as pointers
-//
-//this is for modifying the tail, removing positions,
-//etc
-
-func (snake *Snake) GetMyTail() MyTail {
-
-	//we buffer so we don't have to make a goroutine
-	out := make(chan *Vector2, snake.length)
-
-	beginning, ending := snake.GetSegments()
-
-	for i := len(beginning) - 1; i >= 0; i-- {
-		out <- &beginning[i]
-	}
-
-	for i := len(ending) - 1; i >= 0; i-- {
-		out <- &ending[i]
-	}
-
-	close(out)
-	return out
-
+func GetSnakeCollider(position Vector2) Rect {
+	offset := position.Add(Vector2{-snakeSize / 2, -snakeSize / 2})
+	return Rect{offset, offset.Add(Vector2{snakeSize, snakeSize})}
 }
 
 //this returns a channel that is an "enumerator" over
@@ -183,7 +220,7 @@ func (snake *Snake) GetMyTail() MyTail {
 func (snake *Snake) GetTail() Tail {
 
 	//we buffer so we don't have to make a goroutine
-	out := make(chan Vector2, snake.length)
+	out := make(Tail, snake.length)
 
 	beginning, ending := snake.GetSegments()
 
@@ -200,16 +237,9 @@ func (snake *Snake) GetTail() Tail {
 
 }
 
-func MakeSnakeRect(position Vector2) Rect {
-	return Rect{position, position.Add(Vector2{snakeSize, snakeSize})}
-}
-
 func (snake *Snake) IsColliding(edible Edible) bool {
-	me := Rect{snake.position, snake.position.Add(Vector2{8, 8})}
-	other := Rect{
-		edible.position(),
-		edible.position().Add(edible.size())}
-
+	me := snake.Collider()
+	other := edible.Collider()
 	return me.CollidesWith(other)
 
 }
@@ -249,6 +279,14 @@ func (snake *Snake) Update() {
 	snake.position = snake.position.Add(newPosition).ClampToWindow()
 	snake.AddPosition(snake.position)
 	return
+}
+
+func (seg SnakeSegment) avatar() *ebiten.Image {
+	return seg.snake.avatar
+}
+
+func (seg SnakeSegment) position() Vector2 {
+	return seg.center.Add(Vector2{-snakeSize / 2, -snakeSize / 2})
 }
 
 //this function skips num entries and returns itself

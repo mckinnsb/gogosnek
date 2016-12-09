@@ -5,15 +5,8 @@ import (
 	"math/rand"
 )
 
-const appleSize int = 8
-const appleNutrition int = 20
-
-type Edible interface {
-	amount() int
-	avatar() *ebiten.Image
-	position() Vector2
-	size() Vector2
-}
+const appleSize = 8
+const appleNutrition = 20
 
 type Apple struct {
 
@@ -32,11 +25,13 @@ func (apple *Apple) avatar() *ebiten.Image {
 }
 
 func (apple *Apple) position() Vector2 {
-	return apple.location
+	offset := apple.location.Add(Vector2{-appleSize / 2, -appleSize / 2})
+	return offset
 }
 
-func (apple *Apple) size() Vector2 {
-	return Vector2{float64(appleSize), float64(appleSize)}
+func (apple *Apple) Collider() Rect {
+	offset := apple.location.Add(Vector2{-appleSize / 2, -appleSize / 2})
+	return Rect{offset, offset.Add(Vector2{appleSize, appleSize})}
 }
 
 func (apple *Apple) PlaceRandomly() {

@@ -7,6 +7,13 @@ import (
 	"image/color"
 )
 
+type Drawable interface {
+	//this the image for the edible
+	avatar() *ebiten.Image
+	//this is used for drawing
+	position() Vector2
+}
+
 //draw does not take a pointer to state, so we do not modifiy it
 
 //i had this throw an error for the parent to collect,
@@ -17,46 +24,32 @@ func Draw(game GameState, screen *ebiten.Image) error {
 	//background draw
 	screen.Fill(color.NRGBA{0xff, 0x00, 0x00, 0xff})
 
-	//draw the snake
-	DrawSnake(game.snake, screen)
+	//this might be a real data object someday
+	drawable := []Drawable{game.apple}
 
-	if game.apple != nil {
-		//draw the apple
-		DrawEdible(game.apple, screen)
+	for _, drawObject := range drawable {
+		DrawObject(drawObject, screen)
+	}
+
+	for drawObject := range game.snake.GetDrawTail() {
+		DrawObject(drawObject, screen)
 	}
 
 	return nil
 
 }
 
-func DrawEdible(edible Edible, screen *ebiten.Image) {
+func DrawObject(drawable Drawable, screen *ebiten.Image) {
 
-	position := edible.position()
+	if drawable == nil {
+		return
+	}
+
+	position := drawable.position()
 
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(position.x, position.y)
 
-	screen.DrawImage(edible.avatar(), opts)
-
-}
-
-//this draws the snake - it first draws the box and then
-//figures out how to draw the tail from the last positions
-
-//if any of the draws would go over the snakes head, we know
-//we die, and we throw an "error" to show this
-
-//kind of lazy, but it works because its snek
-
-func DrawSnake(snake Snake, screen *ebiten.Image) {
-
-	for position := range snake.GetTail() {
-		opts := &ebiten.DrawImageOptions{}
-		opts.GeoM.Translate(position.x, position.y)
-
-		screen.DrawImage(snake.avatar, opts)
-	}
-
-	return
+	screen.DrawImage(drawable.avatar(), opts)
 
 }

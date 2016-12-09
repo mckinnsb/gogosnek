@@ -15,6 +15,8 @@ type GameState struct {
 	apple      Edible
 	chef       Chef
 	ended      bool
+	ticker     int
+	tick       int
 	endMessage string
 }
 
@@ -24,6 +26,13 @@ func (game *GameState) End(msg string) {
 }
 
 func (game *GameState) Update(screen *ebiten.Image) error {
+
+	game.tick += 1
+
+	if game.tick%game.ticker != 0 {
+		err := Draw(*game, screen)
+		return err
+	}
 
 	//handled in input.go
 	err := game.input.ProcessInput(game)
@@ -77,6 +86,8 @@ func main() {
 		nil,
 		Chef{},
 		false,
+		1,
+		0,
 		""}
 
 	game.chef.Start()
