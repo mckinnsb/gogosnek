@@ -23,19 +23,19 @@ type Apple struct {
 	location Vector2
 }
 
-func (apple Apple) amount() int {
+func (apple *Apple) amount() int {
 	return appleNutrition
 }
 
-func (apple Apple) avatar() *ebiten.Image {
+func (apple *Apple) avatar() *ebiten.Image {
 	return apple.image
 }
 
-func (apple Apple) position() Vector2 {
+func (apple *Apple) position() Vector2 {
 	return apple.location
 }
 
-func (apple Apple) size() Vector2 {
+func (apple *Apple) size() Vector2 {
 	return Vector2{float64(appleSize), float64(appleSize)}
 }
 

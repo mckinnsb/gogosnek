@@ -20,6 +20,7 @@ const snakeSize = 8
 const startLength = 20
 
 //struct for snek
+
 type Snake struct {
 
 	//the image, this thing is heavy, so, careful
@@ -56,6 +57,16 @@ func (snake *Snake) AddPosition(position Vector2) {
 
 }
 
+//eat a thing you can eat, make snake strong
+
+func (snake *Snake) Eat(eatme Edible) {
+	snake.length += eatme.amount()
+
+	if snake.length > maxLength {
+		snake.length = maxLength
+	}
+}
+
 func (snake *Snake) EatingTail() bool {
 
 	remainder := snake.GetTail().Skip(snakeSize + 1)
@@ -77,15 +88,6 @@ func (snake *Snake) EatingTail() bool {
 	return eatingSelf
 
 }
-
-func MakeSnakeRect(position Vector2) Rect {
-	return Rect{position, position.Add(Vector2{snakeSize, snakeSize})}
-}
-
-//this returns a channel that is an "enumerator" over
-//the past positions recorded by the snake. we return
-//a number of positions equal to the snakes length,
-//which is not a length in pixels
 
 func (snake *Snake) GetTail() Tail {
 
@@ -132,6 +134,15 @@ func (snake *Snake) GetTail() Tail {
 
 }
 
+func MakeSnakeRect(position Vector2) Rect {
+	return Rect{position, position.Add(Vector2{snakeSize, snakeSize})}
+}
+
+//this returns a channel that is an "enumerator" over
+//the past positions recorded by the snake. we return
+//a number of positions equal to the snakes length,
+//which is not a length in pixels
+
 func (snake *Snake) IsColliding(edible Edible) bool {
 	me := Rect{snake.position, snake.position.Add(Vector2{8, 8})}
 	other := Rect{
@@ -140,15 +151,6 @@ func (snake *Snake) IsColliding(edible Edible) bool {
 
 	return me.CollidesWith(other)
 
-}
-
-//eat an edible, make snake strong
-func (snake *Snake) Eat(eatme Edible) {
-	snake.length += eatme.amount()
-
-	if snake.length > maxLength {
-		snake.length = maxLength
-	}
 }
 
 //start snek,

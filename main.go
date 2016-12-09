@@ -36,7 +36,10 @@ func (game *GameState) Update(screen *ebiten.Image) error {
 	if game.apple == nil {
 		apple := game.chef.MakeApple()
 		apple.PlaceRandomly()
-		game.apple = apple
+
+		//apple has pointer recievers, so we must reference
+		//it here
+		game.apple = &apple
 	}
 
 	//handled in snake.go

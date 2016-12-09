@@ -11,7 +11,7 @@ guard :build do
 
     unless fail
       puts "**TESTS PASS**"
-      result = `go test && go install && gopherjs build -o game.js` && "**GAMEBUILT**"
+      result = `go test && go install && gopherjs build -o build/game.js` && "**GAMEBUILT**"
       puts result
     else
       puts "**TESTS FAIL**"
