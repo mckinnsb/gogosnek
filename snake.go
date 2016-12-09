@@ -5,8 +5,6 @@ import (
 	"image/color"
 )
 
-type Tail chan Vector2
-
 //this is only used in creating the storage array,
 //do not use it for calculations!
 const maxLength = 400
@@ -20,7 +18,7 @@ const snakeSize = 8
 const startLength = 20
 
 //struct for snek
-
+// the hero of the day
 type Snake struct {
 
 	//the image, this thing is heavy, so, careful
@@ -46,6 +44,9 @@ type Snake struct {
 	length int
 }
 
+type Tail chan Vector2
+type MyTail chan *Vector2
+
 func (snake *Snake) AddPosition(position Vector2) {
 
 	snake.cursor++
@@ -60,11 +61,32 @@ func (snake *Snake) AddPosition(position Vector2) {
 //eat a thing you can eat, make snake strong
 
 func (snake *Snake) Eat(eatme Edible) {
+
+	oldLength := snake.length
+
 	snake.length += eatme.amount()
 
 	if snake.length > maxLength {
 		snake.length = maxLength
 	}
+
+	if snake.length != oldLength {
+
+		//tail will now be longer, which we can
+		//now go through, and "skip" our old length #-1
+		//of segments, and set them all to the old length-1'th
+		//position
+
+		myTail := snake.GetMyTail().Skip(oldLength - 1)
+		lastSegment := <-myTail
+
+		for segment := range myTail {
+			segment.x = lastSegment.x
+			segment.y = lastSegment.y
+		}
+
+	}
+
 }
 
 func (snake *Snake) EatingTail() bool {
@@ -89,10 +111,12 @@ func (snake *Snake) EatingTail() bool {
 
 }
 
-func (snake *Snake) GetTail() Tail {
+//this function returns slices representing the two
+//segments of the tail, the beginning and the end
+//keep in mind the end *might* be a zero slice,
+//the beginning will always be at least cap1
 
-	//we buffer so we don't have to make a goroutine
-	out := make(chan Vector2, snake.length)
+func (snake *Snake) GetSegments() (beginning, end []Vector2) {
 
 	//this is also "diff", and is used for calcuating
 	//the tail end
@@ -109,11 +133,7 @@ func (snake *Snake) GetTail() Tail {
 	//ill be honest, i don't like this about go; it excludes
 	//the end of the range, so we have to add one here
 
-	beginning := snake.positions[startIndex : snake.cursor+1]
-
-	for i := len(beginning) - 1; i >= 0; i-- {
-		out <- beginning[i]
-	}
+	beginning = snake.positions[startIndex : snake.cursor+1]
 
 	if start < 0 {
 
@@ -121,12 +141,58 @@ func (snake *Snake) GetTail() Tail {
 		//length is the start position of the remainder of the tail
 
 		endIndex := len(snake.positions) + start
-		ending := snake.positions[endIndex:]
+		end = snake.positions[endIndex:]
 
-		for i := len(ending) - 1; i >= 0; i-- {
-			out <- ending[i]
-		}
+	}
 
+	return beginning, end
+
+}
+
+//this returns a channel that is an "enumerator" over
+//the past positions - but as pointers
+//
+//this is for modifying the tail, removing positions,
+//etc
+
+func (snake *Snake) GetMyTail() MyTail {
+
+	//we buffer so we don't have to make a goroutine
+	out := make(chan *Vector2, snake.length)
+
+	beginning, ending := snake.GetSegments()
+
+	for i := len(beginning) - 1; i >= 0; i-- {
+		out <- &beginning[i]
+	}
+
+	for i := len(ending) - 1; i >= 0; i-- {
+		out <- &ending[i]
+	}
+
+	close(out)
+	return out
+
+}
+
+//this returns a channel that is an "enumerator" over
+//the past positions recorded by the snake. we return
+//a number of positions equal to the snakes length,
+//which is not a length in pixels
+
+func (snake *Snake) GetTail() Tail {
+
+	//we buffer so we don't have to make a goroutine
+	out := make(chan Vector2, snake.length)
+
+	beginning, ending := snake.GetSegments()
+
+	for i := len(beginning) - 1; i >= 0; i-- {
+		out <- beginning[i]
+	}
+
+	for i := len(ending) - 1; i >= 0; i-- {
+		out <- ending[i]
 	}
 
 	close(out)
@@ -137,11 +203,6 @@ func (snake *Snake) GetTail() Tail {
 func MakeSnakeRect(position Vector2) Rect {
 	return Rect{position, position.Add(Vector2{snakeSize, snakeSize})}
 }
-
-//this returns a channel that is an "enumerator" over
-//the past positions recorded by the snake. we return
-//a number of positions equal to the snakes length,
-//which is not a length in pixels
 
 func (snake *Snake) IsColliding(edible Edible) bool {
 	me := Rect{snake.position, snake.position.Add(Vector2{8, 8})}
@@ -190,22 +251,37 @@ func (snake *Snake) Update() {
 	return
 }
 
-func (tail Tail) Skip(num int) Tail {
+//this function skips num entries and returns itself
+//returning itself is more a convenience than
+//anything else - channel is a struct around
+//a pointer, so the value will always point
+//to the same tail ( we could skip and not use the return value )
 
-	nothingLeft := false
+func (tail Tail) Skip(num int) Tail {
 
 	for i := 0; i < num; i++ {
 		_, result := <-tail
 		if !result {
-			nothingLeft = true
 			break
 		}
 	}
 
-	if nothingLeft {
-		empty := make(Tail)
-		close(empty)
-		return empty
+	return tail
+
+}
+
+//similar to the function above,
+//there's some repeated code, but avoiding it
+//is more of a pain ( we would have to convert
+//this to an empty interface channel )
+
+func (tail MyTail) Skip(num int) MyTail {
+
+	for i := 0; i < num; i++ {
+		_, result := <-tail
+		if !result {
+			break
+		}
 	}
 
 	return tail

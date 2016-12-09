@@ -34097,7 +34097,7 @@ $packages["math/rand"] = (function() {
 	return $pkg;
 })();
 $packages["github.com/mckinnsb/gogosnek"] = (function() {
-	var $pkg = {}, $init, ebiten, ebitenutil, color, math, rand, Edible, Apple, Chef, InputHandler, GameState, Rect, Tail, Snake, Vector2, ptrType, arrayType, arrayType$1, sliceType, sliceType$1, ptrType$1, ptrType$2, ptrType$3, ptrType$4, ptrType$5, Draw, DrawEdible, DrawSnake, main, MakeSnakeRect, AddVectors, MultiplyVector;
+	var $pkg = {}, $init, ebiten, ebitenutil, color, math, rand, Edible, Apple, Chef, InputHandler, GameState, Rect, Snake, Tail, MyTail, Vector2, ptrType, arrayType, arrayType$1, sliceType, sliceType$1, ptrType$1, ptrType$2, ptrType$3, ptrType$4, ptrType$5, ptrType$6, Draw, DrawEdible, DrawSnake, main, MakeSnakeRect, AddVectors, MultiplyVector;
 	ebiten = $packages["github.com/hajimehoshi/ebiten"];
 	ebitenutil = $packages["github.com/hajimehoshi/ebiten/ebitenutil"];
 	color = $packages["image/color"];
@@ -34158,7 +34158,6 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		this.start = start_;
 		this.end = end_;
 	});
-	Tail = $pkg.Tail = $newType(4, $kindChan, "main.Tail", true, "github.com/mckinnsb/gogosnek", true, null);
 	Snake = $pkg.Snake = $newType(0, $kindStruct, "main.Snake", true, "github.com/mckinnsb/gogosnek", true, function(avatar_, position_, direction_, positions_, cursor_, speed_, length_) {
 		this.$val = this;
 		if (arguments.length === 0) {
@@ -34179,6 +34178,8 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		this.speed = speed_;
 		this.length = length_;
 	});
+	Tail = $pkg.Tail = $newType(4, $kindChan, "main.Tail", true, "github.com/mckinnsb/gogosnek", true, null);
+	MyTail = $pkg.MyTail = $newType(4, $kindChan, "main.MyTail", true, "github.com/mckinnsb/gogosnek", true, null);
 	Vector2 = $pkg.Vector2 = $newType(0, $kindStruct, "main.Vector2", true, "github.com/mckinnsb/gogosnek", true, function(x_, y_) {
 		this.$val = this;
 		if (arguments.length === 0) {
@@ -34194,11 +34195,12 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 	arrayType$1 = $arrayType($Float64, 20);
 	sliceType = $sliceType(ebiten.ImagePart);
 	sliceType$1 = $sliceType(Vector2);
-	ptrType$1 = $ptrType(Apple);
-	ptrType$2 = $ptrType(Chef);
-	ptrType$3 = $ptrType(GameState);
-	ptrType$4 = $ptrType(InputHandler);
-	ptrType$5 = $ptrType(Snake);
+	ptrType$1 = $ptrType(Vector2);
+	ptrType$2 = $ptrType(Apple);
+	ptrType$3 = $ptrType(Chef);
+	ptrType$4 = $ptrType(GameState);
+	ptrType$5 = $ptrType(InputHandler);
+	ptrType$6 = $ptrType(Snake);
 	Apple.ptr.prototype.amount = function() {
 		var $ptr, apple;
 		apple = this;
@@ -34462,17 +34464,39 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 	};
 	Snake.prototype.AddPosition = function(position) { return this.$val.AddPosition(position); };
 	Snake.ptr.prototype.Eat = function(eatme) {
-		var $ptr, _r, eatme, snake, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; eatme = $f.eatme; snake = $f.snake; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _1, _2, _r, _r$1, _r$2, _r$3, _r$4, _tuple, eatme, lastSegment, myTail, oldLength, segment, snake, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _1 = $f._1; _2 = $f._2; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _tuple = $f._tuple; eatme = $f.eatme; lastSegment = $f.lastSegment; myTail = $f.myTail; oldLength = $f.oldLength; segment = $f.segment; snake = $f.snake; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		snake = this;
+		oldLength = snake.length;
 		_r = eatme.amount(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		snake.length = snake.length + (_r) >> 0;
 		if (snake.length > 400) {
 			snake.length = 400;
 		}
+		/* */ if (!((snake.length === oldLength))) { $s = 2; continue; }
+		/* */ $s = 3; continue;
+		/* if (!((snake.length === oldLength))) { */ case 2:
+			_r$1 = snake.GetMyTail(); /* */ $s = 4; case 4: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+			_r$2 = new MyTail(_r$1).Skip(oldLength - 1 >> 0); /* */ $s = 5; case 5: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+			myTail = _r$2;
+			_r$3 = $recv(myTail); /* */ $s = 6; case 6: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+			lastSegment = _r$3[0];
+			_2 = myTail;
+			/* while (true) { */ case 7:
+				_r$4 = $recv(_2); /* */ $s = 9; case 9: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
+				_tuple = _r$4;
+				segment = _tuple[0];
+				_1 = _tuple[1];
+				if (!_1) {
+					/* break; */ $s = 8; continue;
+				}
+				segment.x = lastSegment.x;
+				segment.y = lastSegment.y;
+			/* } */ $s = 7; continue; case 8:
+		/* } */ case 3:
 		$s = -1; return;
 		return;
-		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.Eat }; } $f.$ptr = $ptr; $f._r = _r; $f.eatme = eatme; $f.snake = snake; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.Eat }; } $f.$ptr = $ptr; $f._1 = _1; $f._2 = _2; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._tuple = _tuple; $f.eatme = eatme; $f.lastSegment = lastSegment; $f.myTail = myTail; $f.oldLength = oldLength; $f.segment = segment; $f.snake = snake; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Snake.prototype.Eat = function(eatme) { return this.$val.Eat(eatme); };
 	Snake.ptr.prototype.EatingTail = function() {
@@ -34504,11 +34528,11 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.EatingTail }; } $f.$ptr = $ptr; $f._1 = _1; $f._2 = _2; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._tuple = _tuple; $f.eatingSelf = eatingSelf; $f.head = head; $f.rect = rect; $f.remainder = remainder; $f.snake = snake; $f.suspect = suspect; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Snake.prototype.EatingTail = function() { return this.$val.EatingTail(); };
-	Snake.ptr.prototype.GetTail = function() {
-		var $ptr, beginning, endIndex, ending, i, i$1, out, snake, start, startIndex, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; beginning = $f.beginning; endIndex = $f.endIndex; ending = $f.ending; i = $f.i; i$1 = $f.i$1; out = $f.out; snake = $f.snake; start = $f.start; startIndex = $f.startIndex; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+	Snake.ptr.prototype.GetSegments = function() {
+		var $ptr, _tmp, _tmp$1, beginning, end, endIndex, snake, start, startIndex;
+		beginning = sliceType$1.nil;
+		end = sliceType$1.nil;
 		snake = this;
-		out = new $Chan(Vector2, snake.length);
 		start = (snake.cursor - snake.length >> 0) + 1 >> 0;
 		startIndex = 0;
 		if (start < 0) {
@@ -34517,28 +34541,67 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 			startIndex = start;
 		}
 		beginning = $subslice(snake.positions, startIndex, (snake.cursor + 1 >> 0));
+		if (start < 0) {
+			endIndex = snake.positions.$length + start >> 0;
+			end = $subslice(snake.positions, endIndex);
+		}
+		_tmp = beginning;
+		_tmp$1 = end;
+		beginning = _tmp;
+		end = _tmp$1;
+		return [beginning, end];
+	};
+	Snake.prototype.GetSegments = function() { return this.$val.GetSegments(); };
+	Snake.ptr.prototype.GetMyTail = function() {
+		var $ptr, _tuple, beginning, ending, i, i$1, out, snake, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _tuple = $f._tuple; beginning = $f.beginning; ending = $f.ending; i = $f.i; i$1 = $f.i$1; out = $f.out; snake = $f.snake; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		snake = this;
+		out = new $Chan(ptrType$1, snake.length);
+		_tuple = snake.GetSegments();
+		beginning = _tuple[0];
+		ending = _tuple[1];
+		i = beginning.$length - 1 >> 0;
+		/* while (true) { */ case 1:
+			/* if (!(i >= 0)) { break; } */ if(!(i >= 0)) { $s = 2; continue; }
+			$r = $send(out, ((i < 0 || i >= beginning.$length) ? $throwRuntimeError("index out of range") : beginning.$array[beginning.$offset + i])); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			i = i - (1) >> 0;
+		/* } */ $s = 1; continue; case 2:
+		i$1 = ending.$length - 1 >> 0;
+		/* while (true) { */ case 4:
+			/* if (!(i$1 >= 0)) { break; } */ if(!(i$1 >= 0)) { $s = 5; continue; }
+			$r = $send(out, ((i$1 < 0 || i$1 >= ending.$length) ? $throwRuntimeError("index out of range") : ending.$array[ending.$offset + i$1])); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			i$1 = i$1 - (1) >> 0;
+		/* } */ $s = 4; continue; case 5:
+		$close(out);
+		$s = -1; return out;
+		return out;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.GetMyTail }; } $f.$ptr = $ptr; $f._tuple = _tuple; $f.beginning = beginning; $f.ending = ending; $f.i = i; $f.i$1 = i$1; $f.out = out; $f.snake = snake; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Snake.prototype.GetMyTail = function() { return this.$val.GetMyTail(); };
+	Snake.ptr.prototype.GetTail = function() {
+		var $ptr, _tuple, beginning, ending, i, i$1, out, snake, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _tuple = $f._tuple; beginning = $f.beginning; ending = $f.ending; i = $f.i; i$1 = $f.i$1; out = $f.out; snake = $f.snake; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		snake = this;
+		out = new $Chan(Vector2, snake.length);
+		_tuple = snake.GetSegments();
+		beginning = _tuple[0];
+		ending = _tuple[1];
 		i = beginning.$length - 1 >> 0;
 		/* while (true) { */ case 1:
 			/* if (!(i >= 0)) { break; } */ if(!(i >= 0)) { $s = 2; continue; }
 			$r = $send(out, $clone(((i < 0 || i >= beginning.$length) ? $throwRuntimeError("index out of range") : beginning.$array[beginning.$offset + i]), Vector2)); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 			i = i - (1) >> 0;
 		/* } */ $s = 1; continue; case 2:
-		/* */ if (start < 0) { $s = 4; continue; }
-		/* */ $s = 5; continue;
-		/* if (start < 0) { */ case 4:
-			endIndex = snake.positions.$length + start >> 0;
-			ending = $subslice(snake.positions, endIndex);
-			i$1 = ending.$length - 1 >> 0;
-			/* while (true) { */ case 6:
-				/* if (!(i$1 >= 0)) { break; } */ if(!(i$1 >= 0)) { $s = 7; continue; }
-				$r = $send(out, $clone(((i$1 < 0 || i$1 >= ending.$length) ? $throwRuntimeError("index out of range") : ending.$array[ending.$offset + i$1]), Vector2)); /* */ $s = 8; case 8: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-				i$1 = i$1 - (1) >> 0;
-			/* } */ $s = 6; continue; case 7:
-		/* } */ case 5:
+		i$1 = ending.$length - 1 >> 0;
+		/* while (true) { */ case 4:
+			/* if (!(i$1 >= 0)) { break; } */ if(!(i$1 >= 0)) { $s = 5; continue; }
+			$r = $send(out, $clone(((i$1 < 0 || i$1 >= ending.$length) ? $throwRuntimeError("index out of range") : ending.$array[ending.$offset + i$1]), Vector2)); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			i$1 = i$1 - (1) >> 0;
+		/* } */ $s = 4; continue; case 5:
 		$close(out);
 		$s = -1; return out;
 		return out;
-		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.GetTail }; } $f.$ptr = $ptr; $f.beginning = beginning; $f.endIndex = endIndex; $f.ending = ending; $f.i = i; $f.i$1 = i$1; $f.out = out; $f.snake = snake; $f.start = start; $f.startIndex = startIndex; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.GetTail }; } $f.$ptr = $ptr; $f._tuple = _tuple; $f.beginning = beginning; $f.ending = ending; $f.i = i; $f.i$1 = i$1; $f.out = out; $f.snake = snake; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Snake.prototype.GetTail = function() { return this.$val.GetTail(); };
 	MakeSnakeRect = function(position) {
@@ -34592,10 +34655,9 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 	};
 	Snake.prototype.Update = function() { return this.$val.Update(); };
 	Tail.prototype.Skip = function(num) {
-		var $ptr, _r, _tuple, empty, i, nothingLeft, num, result, tail, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; empty = $f.empty; i = $f.i; nothingLeft = $f.nothingLeft; num = $f.num; result = $f.result; tail = $f.tail; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _r, _tuple, i, num, result, tail, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; i = $f.i; num = $f.num; result = $f.result; tail = $f.tail; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		tail = this.$val;
-		nothingLeft = false;
 		i = 0;
 		/* while (true) { */ case 1:
 			/* if (!(i < num)) { break; } */ if(!(i < num)) { $s = 2; continue; }
@@ -34603,22 +34665,35 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 			_tuple = _r;
 			result = _tuple[1];
 			if (!result) {
-				nothingLeft = true;
 				/* break; */ $s = 2; continue;
 			}
 			i = i + (1) >> 0;
 		/* } */ $s = 1; continue; case 2:
-		if (nothingLeft) {
-			empty = new $Chan(Vector2, 0);
-			$close(empty);
-			$s = -1; return empty;
-			return empty;
-		}
 		$s = -1; return tail;
 		return tail;
-		/* */ } return; } if ($f === undefined) { $f = { $blk: Tail.prototype.Skip }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f.empty = empty; $f.i = i; $f.nothingLeft = nothingLeft; $f.num = num; $f.result = result; $f.tail = tail; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Tail.prototype.Skip }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f.i = i; $f.num = num; $f.result = result; $f.tail = tail; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$ptrType(Tail).prototype.Skip = function(num) { return new Tail(this.$get()).Skip(num); };
+	MyTail.prototype.Skip = function(num) {
+		var $ptr, _r, _tuple, i, num, result, tail, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; i = $f.i; num = $f.num; result = $f.result; tail = $f.tail; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		tail = this.$val;
+		i = 0;
+		/* while (true) { */ case 1:
+			/* if (!(i < num)) { break; } */ if(!(i < num)) { $s = 2; continue; }
+			_r = $recv(tail); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+			_tuple = _r;
+			result = _tuple[1];
+			if (!result) {
+				/* break; */ $s = 2; continue;
+			}
+			i = i + (1) >> 0;
+		/* } */ $s = 1; continue; case 2:
+		$s = -1; return tail;
+		return tail;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: MyTail.prototype.Skip }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f.i = i; $f.num = num; $f.result = result; $f.tail = tail; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$ptrType(MyTail).prototype.Skip = function(num) { return new MyTail(this.$get()).Skip(num); };
 	Vector2.ptr.prototype.Add = function(v2) {
 		var $ptr, v1, v2;
 		v2 = $clone(v2, Vector2);
@@ -34672,13 +34747,14 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		return new Vector2.ptr(v.y, v.x);
 	};
 	Vector2.prototype.Reverse = function() { return this.$val.Reverse(); };
-	ptrType$1.methods = [{prop: "amount", name: "amount", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [$Int], false)}, {prop: "avatar", name: "avatar", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [ptrType], false)}, {prop: "position", name: "position", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [Vector2], false)}, {prop: "size", name: "size", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [Vector2], false)}, {prop: "PlaceRandomly", name: "PlaceRandomly", pkg: "", typ: $funcType([], [], false)}];
-	ptrType$2.methods = [{prop: "MakeApple", name: "MakeApple", pkg: "", typ: $funcType([], [Apple], false)}, {prop: "Start", name: "Start", pkg: "", typ: $funcType([], [], false)}];
-	ptrType$4.methods = [{prop: "ProcessInput", name: "ProcessInput", pkg: "", typ: $funcType([ptrType$3], [$error], false)}];
-	ptrType$3.methods = [{prop: "HandleMovement", name: "HandleMovement", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "End", name: "End", pkg: "", typ: $funcType([$String], [], false)}, {prop: "Update", name: "Update", pkg: "", typ: $funcType([ptrType], [$error], false)}];
+	ptrType$2.methods = [{prop: "amount", name: "amount", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [$Int], false)}, {prop: "avatar", name: "avatar", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [ptrType], false)}, {prop: "position", name: "position", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [Vector2], false)}, {prop: "size", name: "size", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [Vector2], false)}, {prop: "PlaceRandomly", name: "PlaceRandomly", pkg: "", typ: $funcType([], [], false)}];
+	ptrType$3.methods = [{prop: "MakeApple", name: "MakeApple", pkg: "", typ: $funcType([], [Apple], false)}, {prop: "Start", name: "Start", pkg: "", typ: $funcType([], [], false)}];
+	ptrType$5.methods = [{prop: "ProcessInput", name: "ProcessInput", pkg: "", typ: $funcType([ptrType$4], [$error], false)}];
+	ptrType$4.methods = [{prop: "HandleMovement", name: "HandleMovement", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "End", name: "End", pkg: "", typ: $funcType([$String], [], false)}, {prop: "Update", name: "Update", pkg: "", typ: $funcType([ptrType], [$error], false)}];
 	Rect.methods = [{prop: "CollidesWith", name: "CollidesWith", pkg: "", typ: $funcType([Rect], [$Bool], false)}];
+	ptrType$6.methods = [{prop: "AddPosition", name: "AddPosition", pkg: "", typ: $funcType([Vector2], [], false)}, {prop: "Eat", name: "Eat", pkg: "", typ: $funcType([Edible], [], false)}, {prop: "EatingTail", name: "EatingTail", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "GetSegments", name: "GetSegments", pkg: "", typ: $funcType([], [sliceType$1, sliceType$1], false)}, {prop: "GetMyTail", name: "GetMyTail", pkg: "", typ: $funcType([], [MyTail], false)}, {prop: "GetTail", name: "GetTail", pkg: "", typ: $funcType([], [Tail], false)}, {prop: "IsColliding", name: "IsColliding", pkg: "", typ: $funcType([Edible], [$Bool], false)}, {prop: "Start", name: "Start", pkg: "", typ: $funcType([Vector2], [], false)}, {prop: "Update", name: "Update", pkg: "", typ: $funcType([], [], false)}];
 	Tail.methods = [{prop: "Skip", name: "Skip", pkg: "", typ: $funcType([$Int], [Tail], false)}];
-	ptrType$5.methods = [{prop: "AddPosition", name: "AddPosition", pkg: "", typ: $funcType([Vector2], [], false)}, {prop: "Eat", name: "Eat", pkg: "", typ: $funcType([Edible], [], false)}, {prop: "EatingTail", name: "EatingTail", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "GetTail", name: "GetTail", pkg: "", typ: $funcType([], [Tail], false)}, {prop: "IsColliding", name: "IsColliding", pkg: "", typ: $funcType([Edible], [$Bool], false)}, {prop: "Start", name: "Start", pkg: "", typ: $funcType([Vector2], [], false)}, {prop: "Update", name: "Update", pkg: "", typ: $funcType([], [], false)}];
+	MyTail.methods = [{prop: "Skip", name: "Skip", pkg: "", typ: $funcType([$Int], [MyTail], false)}];
 	Vector2.methods = [{prop: "Add", name: "Add", pkg: "", typ: $funcType([Vector2], [Vector2], false)}, {prop: "ClampToWindow", name: "ClampToWindow", pkg: "", typ: $funcType([], [Vector2], false)}, {prop: "Multiply", name: "Multiply", pkg: "", typ: $funcType([$Float64], [Vector2], false)}, {prop: "Reverse", name: "Reverse", pkg: "", typ: $funcType([], [Vector2], false)}];
 	Edible.init([{prop: "amount", name: "amount", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [$Int], false)}, {prop: "avatar", name: "avatar", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [ptrType], false)}, {prop: "position", name: "position", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [Vector2], false)}, {prop: "size", name: "size", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [Vector2], false)}]);
 	Apple.init("github.com/mckinnsb/gogosnek", [{prop: "image", name: "image", exported: false, typ: ptrType, tag: ""}, {prop: "location", name: "location", exported: false, typ: Vector2, tag: ""}]);
@@ -34686,8 +34762,9 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 	InputHandler.init("github.com/mckinnsb/gogosnek", [{prop: "inputDown", name: "inputDown", exported: false, typ: $Bool, tag: ""}]);
 	GameState.init("github.com/mckinnsb/gogosnek", [{prop: "snake", name: "snake", exported: false, typ: Snake, tag: ""}, {prop: "input", name: "input", exported: false, typ: InputHandler, tag: ""}, {prop: "apple", name: "apple", exported: false, typ: Edible, tag: ""}, {prop: "chef", name: "chef", exported: false, typ: Chef, tag: ""}, {prop: "ended", name: "ended", exported: false, typ: $Bool, tag: ""}, {prop: "endMessage", name: "endMessage", exported: false, typ: $String, tag: ""}]);
 	Rect.init("github.com/mckinnsb/gogosnek", [{prop: "start", name: "start", exported: false, typ: Vector2, tag: ""}, {prop: "end", name: "end", exported: false, typ: Vector2, tag: ""}]);
-	Tail.init(Vector2, false, false);
 	Snake.init("github.com/mckinnsb/gogosnek", [{prop: "avatar", name: "avatar", exported: false, typ: ptrType, tag: ""}, {prop: "position", name: "position", exported: false, typ: Vector2, tag: ""}, {prop: "direction", name: "direction", exported: false, typ: Vector2, tag: ""}, {prop: "positions", name: "positions", exported: false, typ: sliceType$1, tag: ""}, {prop: "cursor", name: "cursor", exported: false, typ: $Int, tag: ""}, {prop: "speed", name: "speed", exported: false, typ: $Float64, tag: ""}, {prop: "length", name: "length", exported: false, typ: $Int, tag: ""}]);
+	Tail.init(Vector2, false, false);
+	MyTail.init(ptrType$1, false, false);
 	Vector2.init("github.com/mckinnsb/gogosnek", [{prop: "x", name: "x", exported: false, typ: $Float64, tag: ""}, {prop: "y", name: "y", exported: false, typ: $Float64, tag: ""}]);
 	$init = function() {
 		$pkg.$init = function() {};
