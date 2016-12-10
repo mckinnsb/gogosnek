@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/hajimehoshi/ebiten"
 	"image/color"
 )
@@ -13,6 +14,8 @@ const maxLength = 400
 //(virtual because it is multiplied by the scale factor given to ebiten)
 
 const maxSize = 32
+const sizeIncrease = 4
+const startSize = 8
 
 //start length of snek, don't use this for calculations,
 //just starting snek
@@ -29,6 +32,9 @@ type Snake struct {
 	//the image, this thing is heavy, so, careful
 	//when you deref
 	avatar *ebiten.Image
+
+	//image buddy
+	image *SnakeImage
 
 	//the position and direction of snek
 	position, direction Vector2
@@ -52,17 +58,6 @@ type Snake struct {
 	size float64
 }
 
-type SnakeSegment struct {
-	snake  *Snake
-	center Vector2
-	size   float64
-	image  *ebiten.Image
-}
-
-type Tail chan Vector2
-type MyTail chan *Vector2
-type DrawTail chan Drawable
-
 func (snake *Snake) AddPosition(position Vector2) {
 
 	snake.cursor++
@@ -79,23 +74,15 @@ func (snake *Snake) Collider() Rect {
 }
 
 //eat a thing you can eat, make snake strong
+
 func (snake *Snake) Eat(eatme Edible) {
 
 	oldLength := snake.length
 
 	if snake.advanced && snake.size < maxSize {
 
-		snake.size += 2
-
-		imageSize := int(snake.size)
-
-		//make a new image
-		snake.avatar, _ = ebiten.NewImage(imageSize,
-			imageSize,
-			ebiten.FilterNearest)
-
-		//fill again
-		snake.avatar.Fill(color.White)
+		snake.size += sizeIncrease
+		snake.avatar = snake.GetImageForSize(int(snake.size))
 
 	}
 
@@ -125,6 +112,7 @@ func (snake *Snake) Eat(eatme Edible) {
 }
 
 //are you eating your own tail, snake?
+
 func (snake *Snake) EatingTail() bool {
 
 	remainder := snake.GetTail().Skip(int(snake.size) + 1)
@@ -171,6 +159,24 @@ func (snake *Snake) GetDrawTail() DrawTail {
 
 	close(out)
 	return out
+
+}
+
+//this resturns an image for the snake avatar at its current
+
+func (snake *Snake) GetImageForSize(size int) *ebiten.Image {
+
+	image := snake.image.images[int(size)]
+
+	//this is inefficient, but should only be called
+	//once for non-advanced snek ( it does not change size )
+
+	if !snake.advanced {
+		fmt.Println("im not advanced")
+		image.Fill(color.White)
+	}
+
+	return image
 
 }
 
@@ -275,6 +281,27 @@ func (snake *Snake) IsColliding(edible Edible) bool {
 
 }
 
+func (snake *Snake) ResetToStartSize() {
+
+	//temporary, for now
+
+	snake.size = startSize
+
+	//reset snake images to default
+	snake.image.Start()
+
+	snake.avatar = snake.GetImageForSize(int(snake.size))
+
+	//we dont use tail here because we don't care about order,
+	//everything gets reset
+
+	for i, _ := range snake.positions {
+		snake.positions[i].size = startSize
+		snake.positions[i].image = snake.avatar
+	}
+
+}
+
 //start snek,
 //called by game init function
 
@@ -291,22 +318,18 @@ func (snake *Snake) Start(position Vector2) {
 
 	snake.cursor = 0
 
-	snake.size = 8
+	snake.size = startSize
+
+	//we create our snake image helper here, who creates
+	//all the iamges for sizes ahead of time
+
+	snake.image = &SnakeImage{}
+	snake.image.Start()
 
 	//we create this just once per scale, because it is a heavy struct
-	//we create it once, and then we display parts of it
-	//to simulate the scale. since the snake is just a square
-	//this doesn't matter
+	//we are going to move this into a new class soon
 
-	imageSize := int(snake.size)
-
-	snake.avatar, _ = ebiten.NewImage(imageSize,
-		imageSize,
-		ebiten.FilterNearest)
-
-	//and we do this just once, because it's fairly expensive
-	snake.avatar.Fill(color.White)
-
+	snake.avatar = snake.GetImageForSize(int(snake.size))
 	snake.positions[0] = SnakeSegment{snake, snake.position, snake.size, snake.avatar}
 
 }
@@ -319,49 +342,4 @@ func (snake *Snake) Update() {
 	snake.position = snake.position.Add(newPosition).ClampToWindow()
 	snake.AddPosition(snake.position)
 	return
-}
-
-func (seg SnakeSegment) avatar() *ebiten.Image {
-	return seg.image
-}
-
-func (seg SnakeSegment) position() Vector2 {
-	return seg.center.Add(Vector2{-seg.size / 2, -seg.size / 2})
-}
-
-//this function skips num entries and returns itself
-//returning itself is more a convenience than
-//anything else - channel is a struct around
-//a pointer, so the value will always point
-//to the same tail ( we could skip and not use the return value )
-
-func (tail Tail) Skip(num int) Tail {
-
-	for i := 0; i < num; i++ {
-		_, result := <-tail
-		if !result {
-			break
-		}
-	}
-
-	return tail
-
-}
-
-//similar to the function above,
-//there's some repeated code, but avoiding it
-//is more of a pain ( we would have to convert
-//this to an empty interface channel )
-
-func (tail MyTail) Skip(num int) MyTail {
-
-	for i := 0; i < num; i++ {
-		_, result := <-tail
-		if !result {
-			break
-		}
-	}
-
-	return tail
-
 }

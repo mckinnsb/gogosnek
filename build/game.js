@@ -3109,7 +3109,7 @@ $packages["io"] = (function() {
 	return $pkg;
 })();
 $packages["math"] = (function() {
-	var $pkg = {}, $init, js, arrayType, arrayType$1, arrayType$2, structType, arrayType$3, math, zero, nan, buf, pow10tab, Ceil, Cos, Exp, Log, Mod, Sin, Sincos, init, Float32bits, Float64bits, init$1;
+	var $pkg = {}, $init, js, arrayType, arrayType$1, arrayType$2, structType, arrayType$3, math, zero, posInf, negInf, nan, buf, pow10tab, Ceil, Cos, Exp, Floor, Inf, IsInf, IsNaN, Log, Min, Mod, NaN, Signbit, Sin, Sincos, init, Float32bits, Float64bits, min, init$1;
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	arrayType = $arrayType($Uint32, 2);
 	arrayType$1 = $arrayType($Float32, 2);
@@ -3131,6 +3131,38 @@ $packages["math"] = (function() {
 		return $parseFloat(math.exp(x));
 	};
 	$pkg.Exp = Exp;
+	Floor = function(x) {
+		var $ptr, x;
+		return $parseFloat(math.floor(x));
+	};
+	$pkg.Floor = Floor;
+	Inf = function(sign) {
+		var $ptr, sign;
+		if (sign >= 0) {
+			return posInf;
+		} else {
+			return negInf;
+		}
+	};
+	$pkg.Inf = Inf;
+	IsInf = function(f, sign) {
+		var $ptr, f, sign;
+		if (f === posInf) {
+			return sign >= 0;
+		}
+		if (f === negInf) {
+			return sign <= 0;
+		}
+		return false;
+	};
+	$pkg.IsInf = IsInf;
+	IsNaN = function(f) {
+		var $ptr, f, is;
+		is = false;
+		is = !((f === f));
+		return is;
+	};
+	$pkg.IsNaN = IsNaN;
 	Log = function(x) {
 		var $ptr, x;
 		if (!((x === x))) {
@@ -3139,11 +3171,26 @@ $packages["math"] = (function() {
 		return $parseFloat(math.log(x));
 	};
 	$pkg.Log = Log;
+	Min = function(x, y) {
+		var $ptr, x, y;
+		return min(x, y);
+	};
+	$pkg.Min = Min;
 	Mod = function(x, y) {
 		var $ptr, x, y;
 		return $parseFloat($mod(x, y));
 	};
 	$pkg.Mod = Mod;
+	NaN = function() {
+		var $ptr;
+		return nan;
+	};
+	$pkg.NaN = NaN;
+	Signbit = function(x) {
+		var $ptr, x;
+		return x < 0 || (1 / x === negInf);
+	};
+	$pkg.Signbit = Signbit;
 	Sin = function(x) {
 		var $ptr, x;
 		return $parseFloat(math.sin(x));
@@ -3179,6 +3226,23 @@ $packages["math"] = (function() {
 		return (x = $shiftLeft64(new $Uint64(0, buf.uint32array[1]), 32), x$1 = new $Uint64(0, buf.uint32array[0]), new $Uint64(x.$high + x$1.$high, x.$low + x$1.$low));
 	};
 	$pkg.Float64bits = Float64bits;
+	min = function(x, y) {
+		var $ptr, x, y;
+		if (IsInf(x, -1) || IsInf(y, -1)) {
+			return Inf(-1);
+		} else if (IsNaN(x) || IsNaN(y)) {
+			return NaN();
+		} else if ((x === 0) && (x === y)) {
+			if (Signbit(x)) {
+				return x;
+			}
+			return y;
+		}
+		if (x < y) {
+			return x;
+		}
+		return y;
+	};
 	init$1 = function() {
 		var $ptr, _q, i, m, x;
 		pow10tab[0] = 1;
@@ -3199,6 +3263,8 @@ $packages["math"] = (function() {
 		pow10tab = arrayType$3.zero();
 		math = $global.Math;
 		zero = 0;
+		posInf = 1 / zero;
+		negInf = -1 / zero;
 		nan = 0 / zero;
 		init();
 		init$1();
@@ -4166,7 +4232,7 @@ $packages["github.com/gopherjs/gopherjs/nosync"] = (function() {
 	return $pkg;
 })();
 $packages["time"] = (function() {
-	var $pkg = {}, $init, errors, js, nosync, runtime, syscall, ParseError, Time, Month, Weekday, Duration, Location, zone, zoneTrans, sliceType, sliceType$1, ptrType, sliceType$2, arrayType, sliceType$3, arrayType$1, arrayType$2, ptrType$1, arrayType$4, ptrType$3, ptrType$6, std0x, longDayNames, shortDayNames, shortMonthNames, longMonthNames, atoiError, errBad, errLeadingInt, months, days, daysBefore, utcLoc, utcLoc$24ptr, localLoc, localLoc$24ptr, localOnce, zoneinfo, badData, zoneDirs, _tuple, _r, init, initLocal, indexByte, startsWithLowerCase, nextStdChunk, match, lookup, appendInt, atoi, formatNano, quote, isDigit, getnum, cutspace, skip, Parse, parse, parseTimeZone, parseGMT, parseNanoseconds, leadingInt, absWeekday, absClock, fmtFrac, fmtInt, absDate, daysIn, Unix, isLeap, norm, Date, div, FixedZone;
+	var $pkg = {}, $init, errors, js, nosync, runtime, syscall, ParseError, Time, Month, Weekday, Duration, Location, zone, zoneTrans, sliceType, sliceType$1, ptrType, sliceType$2, structType, arrayType, sliceType$3, arrayType$1, arrayType$2, ptrType$1, arrayType$4, ptrType$3, ptrType$6, std0x, longDayNames, shortDayNames, shortMonthNames, longMonthNames, atoiError, errBad, errLeadingInt, months, days, daysBefore, utcLoc, utcLoc$24ptr, localLoc, localLoc$24ptr, localOnce, zoneinfo, badData, zoneDirs, _tuple, _r, init, initLocal, Sleep, indexByte, startsWithLowerCase, nextStdChunk, match, lookup, appendInt, atoi, formatNano, quote, isDigit, getnum, cutspace, skip, Parse, parse, parseTimeZone, parseGMT, parseNanoseconds, leadingInt, absWeekday, absClock, fmtFrac, fmtInt, absDate, daysIn, Unix, isLeap, norm, Date, div, FixedZone;
 	errors = $packages["errors"];
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	nosync = $packages["github.com/gopherjs/gopherjs/nosync"];
@@ -4251,6 +4317,7 @@ $packages["time"] = (function() {
 	sliceType$1 = $sliceType(zoneTrans);
 	ptrType = $ptrType(zone);
 	sliceType$2 = $sliceType($String);
+	structType = $structType("", []);
 	arrayType = $arrayType($Uint8, 20);
 	sliceType$3 = $sliceType($Uint8);
 	arrayType$1 = $arrayType($Uint8, 9);
@@ -4276,6 +4343,22 @@ $packages["time"] = (function() {
 		localLoc.name = $substring(s, (i + 1 >> 0), j);
 		localLoc.zone = new sliceType([new zone.ptr(localLoc.name, $imul(($parseInt(d.getTimezoneOffset()) >> 0), -60), false)]);
 	};
+	Sleep = function(d) {
+		var $ptr, _r$1, c, d, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r$1 = $f._r$1; c = $f.c; d = $f.d; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		c = [c];
+		c[0] = new $Chan(structType, 0);
+		$setTimeout((function(c) { return function() {
+			var $ptr;
+			$close(c[0]);
+		}; })(c), ((x = $div64(d, new Duration(0, 1000000), false), x.$low + ((x.$high >> 31) * 4294967296)) >> 0));
+		_r$1 = $recv(c[0]); /* */ $s = 1; case 1: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		_r$1[0];
+		$s = -1; return;
+		return;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Sleep }; } $f.$ptr = $ptr; $f._r$1 = _r$1; $f.c = c; $f.d = d; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.Sleep = Sleep;
 	indexByte = function(s, c) {
 		var $ptr, c, s;
 		return $parseInt(s.indexOf($global.String.fromCharCode(c))) >> 0;
@@ -14193,7 +14276,7 @@ $packages["reflect"] = (function() {
 	return $pkg;
 })();
 $packages["fmt"] = (function() {
-	var $pkg = {}, $init, errors, io, math, os, reflect, strconv, sync, utf8, fmtFlags, fmt, State, Formatter, Stringer, GoStringer, buffer, pp, scanError, ss, ssave, sliceType, ptrType, ptrType$1, arrayType, arrayType$1, sliceType$1, sliceType$2, ptrType$2, ptrType$5, ptrType$25, funcType, ppFree, byteType, space, ssFree, complexError, boolError, newPrinter, Sprintf, Errorf, getField, tooLarge, parsenum, intFromArg, parseArgNumber, isSpace, notSpace, indexRune;
+	var $pkg = {}, $init, errors, io, math, os, reflect, strconv, sync, utf8, fmtFlags, fmt, State, Formatter, Stringer, GoStringer, buffer, pp, scanError, ss, ssave, sliceType, ptrType, ptrType$1, arrayType, arrayType$1, sliceType$1, sliceType$2, ptrType$2, ptrType$5, ptrType$25, funcType, ppFree, byteType, space, ssFree, complexError, boolError, newPrinter, Sprintf, Errorf, Fprintln, Println, getField, tooLarge, parsenum, intFromArg, parseArgNumber, isSpace, notSpace, indexRune;
 	errors = $packages["errors"];
 	io = $packages["io"];
 	math = $packages["math"];
@@ -14866,6 +14949,38 @@ $packages["fmt"] = (function() {
 		/* */ } return; } if ($f === undefined) { $f = { $blk: Errorf }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f.a = a; $f.format = format; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$pkg.Errorf = Errorf;
+	Fprintln = function(w, a) {
+		var $ptr, _r, _r$1, _tuple, a, err, n, p, w, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _tuple = $f._tuple; a = $f.a; err = $f.err; n = $f.n; p = $f.p; w = $f.w; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		n = 0;
+		err = $ifaceNil;
+		_r = newPrinter(); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		p = _r;
+		$r = p.doPrintln(a); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		_r$1 = w.Write((x = p.buf, $subslice(new sliceType$2(x.$array), x.$offset, x.$offset + x.$length))); /* */ $s = 3; case 3: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		_tuple = _r$1;
+		n = _tuple[0];
+		err = _tuple[1];
+		p.free();
+		$s = -1; return [n, err];
+		return [n, err];
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Fprintln }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._tuple = _tuple; $f.a = a; $f.err = err; $f.n = n; $f.p = p; $f.w = w; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.Fprintln = Fprintln;
+	Println = function(a) {
+		var $ptr, _r, _tuple, a, err, n, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _tuple = $f._tuple; a = $f.a; err = $f.err; n = $f.n; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		n = 0;
+		err = $ifaceNil;
+		_r = Fprintln(os.Stdout, a); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_tuple = _r;
+		n = _tuple[0];
+		err = _tuple[1];
+		$s = -1; return [n, err];
+		return [n, err];
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Println }; } $f.$ptr = $ptr; $f._r = _r; $f._tuple = _tuple; $f.a = a; $f.err = err; $f.n = n; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.Println = Println;
 	getField = function(v, i) {
 		var $ptr, _r, _r$1, i, v, val, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; i = $f.i; v = $f.v; val = $f.val; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -16210,6 +16325,28 @@ $packages["fmt"] = (function() {
 		/* */ } return; } if ($f === undefined) { $f = { $blk: pp.ptr.prototype.doPrintf }; } $f.$ptr = $ptr; $f._1 = _1; $f._i = _i; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._ref = _ref; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f._tuple$2 = _tuple$2; $f._tuple$3 = _tuple$3; $f._tuple$4 = _tuple$4; $f._tuple$5 = _tuple$5; $f._tuple$6 = _tuple$6; $f._tuple$7 = _tuple$7; $f.a = a; $f.afterIndex = afterIndex; $f.arg = arg; $f.argNum = argNum; $f.c = c; $f.end = end; $f.format = format; $f.i = i; $f.i$1 = i$1; $f.lasti = lasti; $f.p = p; $f.verb = verb; $f.w = w; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	pp.prototype.doPrintf = function(format, a) { return this.$val.doPrintf(format, a); };
+	pp.ptr.prototype.doPrintln = function(a) {
+		var $ptr, _i, _ref, a, arg, argNum, p, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _i = $f._i; _ref = $f._ref; a = $f.a; arg = $f.arg; argNum = $f.argNum; p = $f.p; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		p = this;
+		_ref = a;
+		_i = 0;
+		/* while (true) { */ case 1:
+			/* if (!(_i < _ref.$length)) { break; } */ if(!(_i < _ref.$length)) { $s = 2; continue; }
+			argNum = _i;
+			arg = ((_i < 0 || _i >= _ref.$length) ? $throwRuntimeError("index out of range") : _ref.$array[_ref.$offset + _i]);
+			if (argNum > 0) {
+				(p.$ptr_buf || (p.$ptr_buf = new ptrType$1(function() { return this.$target.buf; }, function($v) { this.$target.buf = $v; }, p))).WriteByte(32);
+			}
+			$r = p.printArg(arg, 118); /* */ $s = 3; case 3: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			_i++;
+		/* } */ $s = 1; continue; case 2:
+		(p.$ptr_buf || (p.$ptr_buf = new ptrType$1(function() { return this.$target.buf; }, function($v) { this.$target.buf = $v; }, p))).WriteByte(10);
+		$s = -1; return;
+		return;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: pp.ptr.prototype.doPrintln }; } $f.$ptr = $ptr; $f._i = _i; $f._ref = _ref; $f.a = a; $f.arg = arg; $f.argNum = argNum; $f.p = p; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	pp.prototype.doPrintln = function(a) { return this.$val.doPrintln(a); };
 	ss.ptr.prototype.Read = function(buf) {
 		var $ptr, _tmp, _tmp$1, buf, err, n, s;
 		n = 0;
@@ -34097,13 +34234,14 @@ $packages["math/rand"] = (function() {
 	return $pkg;
 })();
 $packages["github.com/mckinnsb/gogosnek"] = (function() {
-	var $pkg = {}, $init, fmt, ebiten, ebitenutil, color, math, rand, Apple, Chef, Drawable, Edible, InputHandler, GameState, Rect, Snake, SnakeSegment, Tail, MyTail, DrawTail, Vector2, ptrType, sliceType, arrayType, arrayType$1, sliceType$1, sliceType$2, sliceType$3, ptrType$1, ptrType$2, ptrType$3, ptrType$4, ptrType$5, ptrType$6, Draw, DrawObject, main, AddVectors, MultiplyVector;
+	var $pkg = {}, $init, fmt, ebiten, ebitenutil, color, math, rand, time, Apple, Chef, Drawable, Edible, InputHandler, GameState, Rect, Snake, SnakeImage, SnakeSegment, Tail, MyTail, DrawTail, Vector2, ptrType, sliceType, arrayType, arrayType$1, sliceType$1, sliceType$2, ptrType$1, sliceType$3, sliceType$4, ptrType$2, ptrType$3, ptrType$4, ptrType$5, ptrType$6, funcType, ptrType$7, mapType, DoLevelAnimation, Draw, DrawBackground, DrawObject, main, AddVectors, MultiplyVector;
 	fmt = $packages["fmt"];
 	ebiten = $packages["github.com/hajimehoshi/ebiten"];
 	ebitenutil = $packages["github.com/hajimehoshi/ebiten/ebitenutil"];
 	color = $packages["image/color"];
 	math = $packages["math"];
 	rand = $packages["math/rand"];
+	time = $packages["time"];
 	Apple = $pkg.Apple = $newType(0, $kindStruct, "main.Apple", true, "github.com/mckinnsb/gogosnek", true, function(image_, location_) {
 		this.$val = this;
 		if (arguments.length === 0) {
@@ -34132,28 +34270,38 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		}
 		this.inputDown = inputDown_;
 	});
-	GameState = $pkg.GameState = $newType(0, $kindStruct, "main.GameState", true, "github.com/mckinnsb/gogosnek", true, function(snake_, input_, apple_, chef_, ended_, ticker_, tick_, score_, endMessage_) {
+	GameState = $pkg.GameState = $newType(0, $kindStruct, "main.GameState", true, "github.com/mckinnsb/gogosnek", true, function(snake_, input_, coroutine_, coroutineStart_, chef_, edibles_, ended_, frozen_, level_, ticker_, tick_, score_, running_, endMessage_) {
 		this.$val = this;
 		if (arguments.length === 0) {
-			this.snake = new Snake.ptr(false, ptrType.nil, new Vector2.ptr(0, 0), new Vector2.ptr(0, 0), sliceType$3.nil, 0, 0, 0, 0);
+			this.snake = new Snake.ptr(false, ptrType.nil, ptrType$1.nil, new Vector2.ptr(0, 0), new Vector2.ptr(0, 0), sliceType$3.nil, 0, 0, 0, 0);
 			this.input = new InputHandler.ptr(false);
-			this.apple = $ifaceNil;
+			this.coroutine = $throwNilPointerError;
+			this.coroutineStart = 0;
 			this.chef = new Chef.ptr(ptrType.nil);
+			this.edibles = sliceType$4.nil;
 			this.ended = false;
+			this.frozen = false;
+			this.level = 0;
 			this.ticker = 0;
 			this.tick = 0;
 			this.score = 0;
+			this.running = false;
 			this.endMessage = "";
 			return;
 		}
 		this.snake = snake_;
 		this.input = input_;
-		this.apple = apple_;
+		this.coroutine = coroutine_;
+		this.coroutineStart = coroutineStart_;
 		this.chef = chef_;
+		this.edibles = edibles_;
 		this.ended = ended_;
+		this.frozen = frozen_;
+		this.level = level_;
 		this.ticker = ticker_;
 		this.tick = tick_;
 		this.score = score_;
+		this.running = running_;
 		this.endMessage = endMessage_;
 	});
 	Rect = $pkg.Rect = $newType(0, $kindStruct, "main.Rect", true, "github.com/mckinnsb/gogosnek", true, function(start_, end_) {
@@ -34166,11 +34314,12 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		this.start = start_;
 		this.end = end_;
 	});
-	Snake = $pkg.Snake = $newType(0, $kindStruct, "main.Snake", true, "github.com/mckinnsb/gogosnek", true, function(advanced_, avatar_, position_, direction_, positions_, cursor_, speed_, length_, size_) {
+	Snake = $pkg.Snake = $newType(0, $kindStruct, "main.Snake", true, "github.com/mckinnsb/gogosnek", true, function(advanced_, avatar_, image_, position_, direction_, positions_, cursor_, speed_, length_, size_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.advanced = false;
 			this.avatar = ptrType.nil;
+			this.image = ptrType$1.nil;
 			this.position = new Vector2.ptr(0, 0);
 			this.direction = new Vector2.ptr(0, 0);
 			this.positions = sliceType$3.nil;
@@ -34182,6 +34331,7 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		}
 		this.advanced = advanced_;
 		this.avatar = avatar_;
+		this.image = image_;
 		this.position = position_;
 		this.direction = direction_;
 		this.positions = positions_;
@@ -34190,10 +34340,18 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		this.length = length_;
 		this.size = size_;
 	});
+	SnakeImage = $pkg.SnakeImage = $newType(0, $kindStruct, "main.SnakeImage", true, "github.com/mckinnsb/gogosnek", true, function(images_) {
+		this.$val = this;
+		if (arguments.length === 0) {
+			this.images = false;
+			return;
+		}
+		this.images = images_;
+	});
 	SnakeSegment = $pkg.SnakeSegment = $newType(0, $kindStruct, "main.SnakeSegment", true, "github.com/mckinnsb/gogosnek", true, function(snake_, center_, size_, image_) {
 		this.$val = this;
 		if (arguments.length === 0) {
-			this.snake = ptrType$6.nil;
+			this.snake = ptrType$7.nil;
 			this.center = new Vector2.ptr(0, 0);
 			this.size = 0;
 			this.image = ptrType.nil;
@@ -34223,13 +34381,17 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 	arrayType$1 = $arrayType($Float64, 20);
 	sliceType$1 = $sliceType(ebiten.ImagePart);
 	sliceType$2 = $sliceType($emptyInterface);
+	ptrType$1 = $ptrType(SnakeImage);
 	sliceType$3 = $sliceType(SnakeSegment);
-	ptrType$1 = $ptrType(Vector2);
-	ptrType$2 = $ptrType(Apple);
-	ptrType$3 = $ptrType(Chef);
-	ptrType$4 = $ptrType(GameState);
-	ptrType$5 = $ptrType(InputHandler);
-	ptrType$6 = $ptrType(Snake);
+	sliceType$4 = $sliceType(Edible);
+	ptrType$2 = $ptrType(Vector2);
+	ptrType$3 = $ptrType(Apple);
+	ptrType$4 = $ptrType(Chef);
+	ptrType$5 = $ptrType(GameState);
+	ptrType$6 = $ptrType(InputHandler);
+	funcType = $funcType([ptrType$5, ptrType], [], false);
+	ptrType$7 = $ptrType(Snake);
+	mapType = $mapType($Int, ptrType);
 	Apple.ptr.prototype.amount = function() {
 		var $ptr, apple;
 		apple = this;
@@ -34276,6 +34438,26 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		return apple;
 	};
 	Chef.prototype.MakeApple = function() { return this.$val.MakeApple(); };
+	Chef.ptr.prototype.MakeEdibleForLevel = function(level) {
+		var $ptr, _1, apple, chef, edible, level, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _1 = $f._1; apple = $f.apple; chef = $f.chef; edible = $f.edible; level = $f.level; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		apple = [apple];
+		chef = this;
+		edible = $ifaceNil;
+			_1 = level;
+			/* */ if (_1 === (0)) { $s = 2; continue; }
+			/* */ $s = 3; continue;
+			/* if (_1 === (0)) { */ case 2:
+				apple[0] = $clone(chef.MakeApple(), Apple);
+				$r = apple[0].PlaceRandomly(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+				edible = apple[0];
+			/* } */ case 3:
+		case 1:
+		$s = -1; return edible;
+		return edible;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Chef.ptr.prototype.MakeEdibleForLevel }; } $f.$ptr = $ptr; $f._1 = _1; $f.apple = apple; $f.chef = chef; $f.edible = edible; $f.level = level; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Chef.prototype.MakeEdibleForLevel = function(level) { return this.$val.MakeEdibleForLevel(level); };
 	Chef.ptr.prototype.Start = function() {
 		var $ptr, _r, _r$1, _tuple, chef, x, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _tuple = $f._tuple; chef = $f.chef; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -34290,38 +34472,95 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		/* */ } return; } if ($f === undefined) { $f = { $blk: Chef.ptr.prototype.Start }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._tuple = _tuple; $f.chef = chef; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Chef.prototype.Start = function() { return this.$val.Start(); };
+	DoLevelAnimation = function(game, screen) {
+		var $ptr, _1, _2, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, _r$7, _tuple, diffX, diffY, game, i, newPosition, newSegment, newSize, percentageRemaining, randomColor, screen, segment, shrunkImage, sizeDiff, sizeDiffAsFloat, sizeDiffAsInt, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _1 = $f._1; _2 = $f._2; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _r$6 = $f._r$6; _r$7 = $f._r$7; _tuple = $f._tuple; diffX = $f.diffX; diffY = $f.diffY; game = $f.game; i = $f.i; newPosition = $f.newPosition; newSegment = $f.newSegment; newSize = $f.newSize; percentageRemaining = $f.percentageRemaining; randomColor = $f.randomColor; screen = $f.screen; segment = $f.segment; shrunkImage = $f.shrunkImage; sizeDiff = $f.sizeDiff; sizeDiffAsFloat = $f.sizeDiffAsFloat; sizeDiffAsInt = $f.sizeDiffAsInt; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = DrawBackground(screen); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		percentageRemaining = (game.tick - game.coroutineStart >> 0) / 180;
+		if (percentageRemaining > 1) {
+			percentageRemaining = 1;
+		}
+		sizeDiffAsFloat = 24 * percentageRemaining;
+		sizeDiffAsInt = (math.Floor(sizeDiffAsFloat) >> 0);
+		sizeDiff = ((2 - (_r = sizeDiffAsInt % 2, _r === _r ? _r : $throwRuntimeError("integer divide by zero")) >> 0)) + sizeDiffAsInt >> 0;
+		newSize = 32 - sizeDiff >> 0;
+		if (newSize < 8) {
+			newSize = 8;
+		}
+		i = 0;
+		_r$1 = game.snake.GetImageForSize(newSize); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		shrunkImage = _r$1;
+		_r$2 = rand.Intn(255); /* */ $s = 3; case 3: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+		_r$3 = rand.Intn(255); /* */ $s = 4; case 4: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+		_r$4 = rand.Intn(255); /* */ $s = 5; case 5: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
+		randomColor = new color.NRGBA.ptr((_r$2 << 24 >>> 24), (_r$3 << 24 >>> 24), (_r$4 << 24 >>> 24), 255);
+		_r$5 = shrunkImage.Fill(new randomColor.constructor.elem(randomColor)); /* */ $s = 6; case 6: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
+		_r$5;
+		_r$6 = game.snake.GetTail(); /* */ $s = 7; case 7: if($c) { $c = false; _r$6 = _r$6.$blk(); } if (_r$6 && _r$6.$blk !== undefined) { break s; }
+		_2 = _r$6;
+		/* while (true) { */ case 8:
+			_r$7 = $recv(_2); /* */ $s = 10; case 10: if($c) { $c = false; _r$7 = _r$7.$blk(); } if (_r$7 && _r$7.$blk !== undefined) { break s; }
+			_tuple = _r$7;
+			segment = $clone(_tuple[0], Vector2);
+			_1 = _tuple[1];
+			if (!_1) {
+				/* break; */ $s = 9; continue;
+			}
+			i = i + (1) >> 0;
+			diffX = math.Cos((game.tick + i >> 0) * 0.13089969389957473) * (5 - (4 * percentageRemaining));
+			diffY = math.Sin((game.tick + i >> 0) * 0.13089969389957473) * (5 - (4 * percentageRemaining));
+			newPosition = new Vector2.ptr(diffX + segment.x, diffY + segment.y);
+			newSegment = new SnakeSegment.ptr(game.snake, $clone(newPosition, Vector2), newSize, shrunkImage);
+			$r = DrawObject(new newSegment.constructor.elem(newSegment), screen); /* */ $s = 11; case 11: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* } */ $s = 8; continue; case 9:
+		$s = -1; return;
+		return;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: DoLevelAnimation }; } $f.$ptr = $ptr; $f._1 = _1; $f._2 = _2; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f._r$7 = _r$7; $f._tuple = _tuple; $f.diffX = diffX; $f.diffY = diffY; $f.game = game; $f.i = i; $f.newPosition = newPosition; $f.newSegment = newSegment; $f.newSize = newSize; $f.percentageRemaining = percentageRemaining; $f.randomColor = randomColor; $f.screen = screen; $f.segment = segment; $f.shrunkImage = shrunkImage; $f.sizeDiff = sizeDiff; $f.sizeDiffAsFloat = sizeDiffAsFloat; $f.sizeDiffAsInt = sizeDiffAsInt; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.DoLevelAnimation = DoLevelAnimation;
 	Draw = function(game, screen) {
-		var $ptr, _1, _2, _i, _r, _r$1, _r$2, _ref, _tuple, drawObject, drawObject$1, drawable, game, screen, x, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _1 = $f._1; _2 = $f._2; _i = $f._i; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _ref = $f._ref; _tuple = $f._tuple; drawObject = $f.drawObject; drawObject$1 = $f.drawObject$1; drawable = $f.drawable; game = $f.game; screen = $f.screen; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _1, _2, _i, _r, _r$1, _ref, _tuple, drawObject, drawable, edible, game, i, screen, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _1 = $f._1; _2 = $f._2; _i = $f._i; _r = $f._r; _r$1 = $f._r$1; _ref = $f._ref; _tuple = $f._tuple; drawObject = $f.drawObject; drawable = $f.drawable; edible = $f.edible; game = $f.game; i = $f.i; screen = $f.screen; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		game = $clone(game, GameState);
-		_r = screen.Fill((x = new color.NRGBA.ptr(255, 0, 0, 255), new x.constructor.elem(x))); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_r;
-		drawable = new sliceType([game.apple]);
-		_ref = drawable;
+		$r = DrawBackground(screen); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		drawable = $makeSlice(sliceType, game.edibles.$length);
+		_ref = game.edibles;
 		_i = 0;
 		/* while (true) { */ case 2:
 			/* if (!(_i < _ref.$length)) { break; } */ if(!(_i < _ref.$length)) { $s = 3; continue; }
-			drawObject = ((_i < 0 || _i >= _ref.$length) ? $throwRuntimeError("index out of range") : _ref.$array[_ref.$offset + _i]);
-			$r = DrawObject(drawObject, screen); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			i = _i;
+			edible = ((_i < 0 || _i >= _ref.$length) ? $throwRuntimeError("index out of range") : _ref.$array[_ref.$offset + _i]);
+			((i < 0 || i >= drawable.$length) ? $throwRuntimeError("index out of range") : drawable.$array[drawable.$offset + i] = edible);
+			$r = DrawObject(((i < 0 || i >= drawable.$length) ? $throwRuntimeError("index out of range") : drawable.$array[drawable.$offset + i]), screen); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 			_i++;
 		/* } */ $s = 2; continue; case 3:
-		_r$1 = game.snake.GetDrawTail(); /* */ $s = 5; case 5: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
-		_2 = _r$1;
+		_r = game.snake.GetDrawTail(); /* */ $s = 5; case 5: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_2 = _r;
 		/* while (true) { */ case 6:
-			_r$2 = $recv(_2); /* */ $s = 8; case 8: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
-			_tuple = _r$2;
-			drawObject$1 = _tuple[0];
+			_r$1 = $recv(_2); /* */ $s = 8; case 8: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+			_tuple = _r$1;
+			drawObject = _tuple[0];
 			_1 = _tuple[1];
 			if (!_1) {
 				/* break; */ $s = 7; continue;
 			}
-			$r = DrawObject(drawObject$1, screen); /* */ $s = 9; case 9: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			$r = DrawObject(drawObject, screen); /* */ $s = 9; case 9: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		/* } */ $s = 6; continue; case 7:
 		$s = -1; return $ifaceNil;
 		return $ifaceNil;
-		/* */ } return; } if ($f === undefined) { $f = { $blk: Draw }; } $f.$ptr = $ptr; $f._1 = _1; $f._2 = _2; $f._i = _i; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._ref = _ref; $f._tuple = _tuple; $f.drawObject = drawObject; $f.drawObject$1 = drawObject$1; $f.drawable = drawable; $f.game = game; $f.screen = screen; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Draw }; } $f.$ptr = $ptr; $f._1 = _1; $f._2 = _2; $f._i = _i; $f._r = _r; $f._r$1 = _r$1; $f._ref = _ref; $f._tuple = _tuple; $f.drawObject = drawObject; $f.drawable = drawable; $f.edible = edible; $f.game = game; $f.i = i; $f.screen = screen; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$pkg.Draw = Draw;
+	DrawBackground = function(screen) {
+		var $ptr, _r, screen, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; screen = $f.screen; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		_r = screen.Fill((x = new color.NRGBA.ptr(255, 0, 0, 255), new x.constructor.elem(x))); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		_r;
+		$s = -1; return;
+		return;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: DrawBackground }; } $f.$ptr = $ptr; $f._r = _r; $f.screen = screen; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.DrawBackground = DrawBackground;
 	DrawObject = function(drawable, screen) {
 		var $ptr, _r, _r$1, _r$2, _r$3, drawable, opts, position, screen, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; drawable = $f.drawable; opts = $f.opts; position = $f.position; screen = $f.screen; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -34392,19 +34631,124 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		/* */ } return; } if ($f === undefined) { $f = { $blk: InputHandler.ptr.prototype.ProcessInput }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f.game = game; $f.input = input; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	InputHandler.prototype.ProcessInput = function(game) { return this.$val.ProcessInput(game); };
+	InputHandler.ptr.prototype.WaitForOption = function(game) {
+		var $ptr, _r, _r$1, _r$2, _v, game, input, keyPressed, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _v = $f._v; game = $f.game; input = $f.input; keyPressed = $f.keyPressed; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		input = this;
+		keyPressed = false;
+			_r = ebiten.IsKeyPressed(34); /* */ $s = 6; case 6: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+			if (_r) { _v = true; $s = 5; continue s; }
+			_r$1 = ebiten.IsKeyPressed(44); /* */ $s = 7; case 7: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+			_v = _r$1; case 5:
+			/* */ if (_v) { $s = 2; continue; }
+			_r$2 = ebiten.IsKeyPressed(23); /* */ $s = 8; case 8: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+			/* */ if (_r$2) { $s = 3; continue; }
+			/* */ $s = 4; continue;
+			/* if (_v) { */ case 2:
+				game.snake.advanced = true;
+				keyPressed = true;
+				$s = 4; continue;
+			/* } else if (_r$2) { */ case 3:
+				keyPressed = true;
+			/* } */ case 4:
+		case 1:
+		/* */ if (keyPressed) { $s = 9; continue; }
+		/* */ $s = 10; continue;
+		/* if (keyPressed) { */ case 9:
+			$r = game.Start(); /* */ $s = 11; case 11: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* } */ case 10:
+		$s = -1; return;
+		return;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: InputHandler.ptr.prototype.WaitForOption }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._v = _v; $f.game = game; $f.input = input; $f.keyPressed = keyPressed; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	InputHandler.prototype.WaitForOption = function(game) { return this.$val.WaitForOption(game); };
+	GameState.ptr.prototype.AdvanceLevel = function(screen) {
+		var $ptr, game, screen;
+		game = this;
+		game.frozen = true;
+		game.running = false;
+		game.coroutine = DoLevelAnimation;
+		game.coroutineStart = game.tick;
+		$go((function $b() {
+			var $ptr, $s, $r;
+			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+			$r = time.Sleep(new time.Duration(0, 3000000000)); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			$r = game.snake.ResetToStartSize(); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			game.NextLevel();
+			game.running = true;
+			game.frozen = false;
+			$s = -1; return;
+			return;
+			/* */ } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f.$s = $s; $f.$r = $r; return $f;
+		}), []);
+	};
+	GameState.prototype.AdvanceLevel = function(screen) { return this.$val.AdvanceLevel(screen); };
 	GameState.ptr.prototype.End = function(msg) {
 		var $ptr, game, msg;
 		game = this;
 		game.ended = true;
+		game.running = false;
 		game.endMessage = msg;
 	};
 	GameState.prototype.End = function(msg) { return this.$val.End(msg); };
-	GameState.ptr.prototype.Update = function(screen) {
-		var $ptr, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, apple, err, err$1, game, screen, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _r$6 = $f._r$6; apple = $f.apple; err = $f.err; err$1 = $f.err$1; game = $f.game; screen = $f.screen; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		apple = [apple];
+	GameState.ptr.prototype.Main = function(screen) {
+		var $ptr, _r, _r$1, _r$2, game, screen, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; game = $f.game; screen = $f.screen; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		game = this;
 		game.tick = game.tick + (1) >> 0;
+			/* */ if (game.ended) { $s = 2; continue; }
+			/* */ if (game.running) { $s = 3; continue; }
+			/* */ if (game.frozen) { $s = 4; continue; }
+			/* */ $s = 5; continue;
+			/* if (game.ended) { */ case 2:
+				_r = ebitenutil.DebugPrint(screen, game.endMessage); /* */ $s = 7; case 7: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+				_r;
+				$s = 6; continue;
+			/* } else if (game.running) { */ case 3:
+				_r$1 = game.Update(screen); /* */ $s = 8; case 8: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+				_r$1;
+				$s = 6; continue;
+			/* } else if (game.frozen) { */ case 4:
+				/* */ if (!(game.coroutine === $throwNilPointerError)) { $s = 9; continue; }
+				/* */ $s = 10; continue;
+				/* if (!(game.coroutine === $throwNilPointerError)) { */ case 9:
+					$r = game.coroutine(game, screen); /* */ $s = 11; case 11: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+				/* } */ case 10:
+				$s = 6; continue;
+			/* } else { */ case 5:
+				_r$2 = ebitenutil.DebugPrint(screen, "Advanced Snek? (Y/n)"); /* */ $s = 12; case 12: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+				_r$2;
+				$r = game.input.WaitForOption(game); /* */ $s = 13; case 13: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+			/* } */ case 6:
+		case 1:
+		$s = -1; return $ifaceNil;
+		return $ifaceNil;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: GameState.ptr.prototype.Main }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f.game = game; $f.screen = screen; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	GameState.prototype.Main = function(screen) { return this.$val.Main(screen); };
+	GameState.ptr.prototype.NextLevel = function() {
+		var $ptr, game;
+		game = this;
+		game.level = game.level + (1) >> 0;
+		game.level = (math.Min(0, game.level) >> 0);
+	};
+	GameState.prototype.NextLevel = function() { return this.$val.NextLevel(); };
+	GameState.ptr.prototype.Start = function() {
+		var $ptr, game, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; game = $f.game; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		game = this;
+		$r = game.chef.Start(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = game.snake.Start(new Vector2.ptr(160, 120)); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		game.running = true;
+		$s = -1; return;
+		return;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: GameState.ptr.prototype.Start }; } $f.$ptr = $ptr; $f.game = game; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	GameState.prototype.Start = function() { return this.$val.Start(); };
+	GameState.ptr.prototype.Update = function(screen) {
+		var $ptr, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, _r$7, edible, err, err$1, game, i, screen, x, x$1, x$2, x$3, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _r$6 = $f._r$6; _r$7 = $f._r$7; edible = $f.edible; err = $f.err; err$1 = $f.err$1; game = $f.game; i = $f.i; screen = $f.screen; x = $f.x; x$1 = $f.x$1; x$2 = $f.x$2; x$3 = $f.x$3; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		game = this;
 		/* */ if (!(((_r = game.tick % game.ticker, _r === _r ? _r : $throwRuntimeError("integer divide by zero")) === 0))) { $s = 1; continue; }
 		/* */ $s = 2; continue;
 		/* if (!(((_r = game.tick % game.ticker, _r === _r ? _r : $throwRuntimeError("integer divide by zero")) === 0))) { */ case 1:
@@ -34413,75 +34757,71 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 			$s = -1; return err;
 			return err;
 		/* } */ case 2:
+		if (game.snake.advanced && (game.snake.size === 32)) {
+			game.AdvanceLevel(screen);
+			$s = -1; return $ifaceNil;
+			return $ifaceNil;
+		}
 		_r$2 = game.input.ProcessInput(game); /* */ $s = 4; case 4: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
 		err$1 = _r$2;
 		if (!($interfaceIsEqual(err$1, $ifaceNil))) {
 			$s = -1; return err$1;
 			return err$1;
 		}
-		/* */ if ($interfaceIsEqual(game.apple, $ifaceNil)) { $s = 5; continue; }
+		/* */ if ($interfaceIsEqual((x = game.edibles, (0 >= x.$length ? $throwRuntimeError("index out of range") : x.$array[x.$offset + 0])), $ifaceNil)) { $s = 5; continue; }
 		/* */ $s = 6; continue;
-		/* if ($interfaceIsEqual(game.apple, $ifaceNil)) { */ case 5:
-			apple[0] = $clone(game.chef.MakeApple(), Apple);
-			$r = apple[0].PlaceRandomly(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-			game.apple = apple[0];
+		/* if ($interfaceIsEqual((x = game.edibles, (0 >= x.$length ? $throwRuntimeError("index out of range") : x.$array[x.$offset + 0])), $ifaceNil)) { */ case 5:
+			_r$3 = game.chef.MakeEdibleForLevel(game.level); /* */ $s = 7; case 7: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+			(x$1 = game.edibles, (0 >= x$1.$length ? $throwRuntimeError("index out of range") : x$1.$array[x$1.$offset + 0] = _r$3));
 		/* } */ case 6:
 		game.snake.Update();
-		_r$3 = game.snake.EatingTail(); /* */ $s = 10; case 10: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
-		/* */ if (_r$3) { $s = 8; continue; }
+		_r$4 = game.snake.EatingTail(); /* */ $s = 10; case 10: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
+		/* */ if (_r$4) { $s = 8; continue; }
 		/* */ $s = 9; continue;
-		/* if (_r$3) { */ case 8:
-			_r$4 = fmt.Sprintf("Game Over! Score: %v", new sliceType$2([new $Int(game.score)])); /* */ $s = 11; case 11: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
-			$r = game.End(_r$4); /* */ $s = 12; case 12: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* if (_r$4) { */ case 8:
+			_r$5 = fmt.Sprintf("Game Over! Score: %v", new sliceType$2([new $Int(game.score)])); /* */ $s = 11; case 11: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
+			$r = game.End(_r$5); /* */ $s = 12; case 12: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		/* } */ case 9:
-		_r$5 = game.snake.IsColliding(game.apple); /* */ $s = 15; case 15: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
-		/* */ if (_r$5) { $s = 13; continue; }
-		/* */ $s = 14; continue;
-		/* if (_r$5) { */ case 13:
-			$r = game.snake.Eat(game.apple); /* */ $s = 16; case 16: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-			game.score = game.score + (1) >> 0;
-			game.apple = $ifaceNil;
-		/* } */ case 14:
-		_r$6 = Draw(game, screen); /* */ $s = 17; case 17: if($c) { $c = false; _r$6 = _r$6.$blk(); } if (_r$6 && _r$6.$blk !== undefined) { break s; }
-		err$1 = _r$6;
+		i = 0;
+		/* while (true) { */ case 13:
+			/* if (!(i < game.edibles.$length)) { break; } */ if(!(i < game.edibles.$length)) { $s = 14; continue; }
+			edible = (x$2 = game.edibles, ((i < 0 || i >= x$2.$length) ? $throwRuntimeError("index out of range") : x$2.$array[x$2.$offset + i]));
+			/* */ if ($interfaceIsEqual(edible, $ifaceNil)) { $s = 15; continue; }
+			/* */ $s = 16; continue;
+			/* if ($interfaceIsEqual(edible, $ifaceNil)) { */ case 15:
+				i = i + (1) >> 0;
+				/* continue; */ $s = 13; continue;
+			/* } */ case 16:
+			_r$6 = game.snake.IsColliding(edible); /* */ $s = 19; case 19: if($c) { $c = false; _r$6 = _r$6.$blk(); } if (_r$6 && _r$6.$blk !== undefined) { break s; }
+			/* */ if (_r$6) { $s = 17; continue; }
+			/* */ $s = 18; continue;
+			/* if (_r$6) { */ case 17:
+				$r = game.snake.Eat(edible); /* */ $s = 20; case 20: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+				game.score = game.score + (1) >> 0;
+				(x$3 = game.edibles, ((i < 0 || i >= x$3.$length) ? $throwRuntimeError("index out of range") : x$3.$array[x$3.$offset + i] = $ifaceNil));
+			/* } */ case 18:
+			i = i + (1) >> 0;
+		/* } */ $s = 13; continue; case 14:
+		_r$7 = Draw(game, screen); /* */ $s = 21; case 21: if($c) { $c = false; _r$7 = _r$7.$blk(); } if (_r$7 && _r$7.$blk !== undefined) { break s; }
+		err$1 = _r$7;
 		if (!($interfaceIsEqual(err$1, $ifaceNil))) {
 			$s = -1; return err$1;
 			return err$1;
 		}
 		$s = -1; return $ifaceNil;
 		return $ifaceNil;
-		/* */ } return; } if ($f === undefined) { $f = { $blk: GameState.ptr.prototype.Update }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f.apple = apple; $f.err = err; $f.err$1 = err$1; $f.game = game; $f.screen = screen; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: GameState.ptr.prototype.Update }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f._r$7 = _r$7; $f.edible = edible; $f.err = err; $f.err$1 = err$1; $f.game = game; $f.i = i; $f.screen = screen; $f.x = x; $f.x$1 = x$1; $f.x$2 = x$2; $f.x$3 = x$3; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	GameState.prototype.Update = function(screen) { return this.$val.Update(screen); };
 	main = function() {
-		var $ptr, _r, game, updateFunction, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; game = $f.game; updateFunction = $f.updateFunction; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-		game = [game];
-		game[0] = new GameState.ptr(new Snake.ptr(false, ptrType.nil, new Vector2.ptr(0, 0), new Vector2.ptr(1, 0), sliceType$3.nil, 0, 2, 0, 0), new InputHandler.ptr(false), $ifaceNil, new Chef.ptr(ptrType.nil), false, 1, 0, 0, "");
-		$r = game[0].chef.Start(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		$r = game[0].snake.Start(new Vector2.ptr(160, 120)); /* */ $s = 2; case 2: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		updateFunction = (function(game) { return function $b(screen) {
-			var $ptr, _r, _r$1, screen, $s, $r;
-			/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; screen = $f.screen; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
-			/* */ if (game[0].ended) { $s = 1; continue; }
-			/* */ $s = 2; continue;
-			/* if (game[0].ended) { */ case 1:
-				_r = ebitenutil.DebugPrint(screen, game[0].endMessage); /* */ $s = 4; case 4: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-				_r;
-				$s = 3; continue;
-			/* } else { */ case 2:
-				_r$1 = game[0].Update(screen); /* */ $s = 5; case 5: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
-				_r$1;
-			/* } */ case 3:
-			$s = -1; return $ifaceNil;
-			return $ifaceNil;
-			/* */ } return; } if ($f === undefined) { $f = { $blk: $b }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f.screen = screen; $f.$s = $s; $f.$r = $r; return $f;
-		}; })(game);
-		_r = ebiten.Run(updateFunction, 320, 240, 2, "Go Go Snek!"); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		var $ptr, _r, game, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; game = $f.game; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		game = new GameState.ptr(new Snake.ptr(false, ptrType.nil, ptrType$1.nil, new Vector2.ptr(0, 0), new Vector2.ptr(1, 0), sliceType$3.nil, 0, 2, 0, 0), new InputHandler.ptr(false), $throwNilPointerError, 0, new Chef.ptr(ptrType.nil), $makeSlice(sliceType$4, 10), false, false, 0, 1, 0, 0, false, "");
+		_r = ebiten.Run($methodVal(game, "Main"), 320, 240, 2, "Go Go Snek!"); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		_r;
 		$s = -1; return;
 		return;
-		/* */ } return; } if ($f === undefined) { $f = { $blk: main }; } $f.$ptr = $ptr; $f._r = _r; $f.game = game; $f.updateFunction = updateFunction; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: main }; } $f.$ptr = $ptr; $f._r = _r; $f.game = game; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Rect.ptr.prototype.CollidesWith = function(other) {
 		var $ptr, other, rect;
@@ -34514,50 +34854,46 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 	};
 	Snake.prototype.Collider = function() { return this.$val.Collider(); };
 	Snake.ptr.prototype.Eat = function(eatme) {
-		var $ptr, _1, _2, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _r$6, _tuple, _tuple$1, eatme, imageSize, lastSegment, myTail, oldLength, segment, snake, x, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _1 = $f._1; _2 = $f._2; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _r$6 = $f._r$6; _tuple = $f._tuple; _tuple$1 = $f._tuple$1; eatme = $f.eatme; imageSize = $f.imageSize; lastSegment = $f.lastSegment; myTail = $f.myTail; oldLength = $f.oldLength; segment = $f.segment; snake = $f.snake; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _1, _2, _r, _r$1, _r$2, _r$3, _r$4, _r$5, _tuple, eatme, lastSegment, myTail, oldLength, segment, snake, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _1 = $f._1; _2 = $f._2; _r = $f._r; _r$1 = $f._r$1; _r$2 = $f._r$2; _r$3 = $f._r$3; _r$4 = $f._r$4; _r$5 = $f._r$5; _tuple = $f._tuple; eatme = $f.eatme; lastSegment = $f.lastSegment; myTail = $f.myTail; oldLength = $f.oldLength; segment = $f.segment; snake = $f.snake; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		snake = this;
 		oldLength = snake.length;
 		/* */ if (snake.advanced && snake.size < 32) { $s = 1; continue; }
 		/* */ $s = 2; continue;
 		/* if (snake.advanced && snake.size < 32) { */ case 1:
-			snake.size = snake.size + (2);
-			imageSize = (snake.size >> 0);
-			_r = ebiten.NewImage(imageSize, imageSize, 0); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-			_tuple = _r;
-			snake.avatar = _tuple[0];
-			_r$1 = snake.avatar.Fill((x = color.White, new x.constructor.elem(x))); /* */ $s = 4; case 4: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
-			_r$1;
+			snake.size = snake.size + (4);
+			_r = snake.GetImageForSize((snake.size >> 0)); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+			snake.avatar = _r;
 		/* } */ case 2:
-		_r$2 = eatme.amount(); /* */ $s = 5; case 5: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
-		snake.length = snake.length + (_r$2) >> 0;
+		_r$1 = eatme.amount(); /* */ $s = 4; case 4: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+		snake.length = snake.length + (_r$1) >> 0;
 		if (snake.length > 400) {
 			snake.length = 400;
 		}
-		/* */ if (!((snake.length === oldLength))) { $s = 6; continue; }
-		/* */ $s = 7; continue;
-		/* if (!((snake.length === oldLength))) { */ case 6:
-			_r$3 = snake.GetMyTail(); /* */ $s = 8; case 8: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
-			_r$4 = new MyTail(_r$3).Skip(oldLength - 1 >> 0); /* */ $s = 9; case 9: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
-			myTail = _r$4;
-			_r$5 = $recv(myTail); /* */ $s = 10; case 10: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
-			lastSegment = _r$5[0];
+		/* */ if (!((snake.length === oldLength))) { $s = 5; continue; }
+		/* */ $s = 6; continue;
+		/* if (!((snake.length === oldLength))) { */ case 5:
+			_r$2 = snake.GetMyTail(); /* */ $s = 7; case 7: if($c) { $c = false; _r$2 = _r$2.$blk(); } if (_r$2 && _r$2.$blk !== undefined) { break s; }
+			_r$3 = new MyTail(_r$2).Skip(oldLength - 1 >> 0); /* */ $s = 8; case 8: if($c) { $c = false; _r$3 = _r$3.$blk(); } if (_r$3 && _r$3.$blk !== undefined) { break s; }
+			myTail = _r$3;
+			_r$4 = $recv(myTail); /* */ $s = 9; case 9: if($c) { $c = false; _r$4 = _r$4.$blk(); } if (_r$4 && _r$4.$blk !== undefined) { break s; }
+			lastSegment = _r$4[0];
 			_2 = myTail;
-			/* while (true) { */ case 11:
-				_r$6 = $recv(_2); /* */ $s = 13; case 13: if($c) { $c = false; _r$6 = _r$6.$blk(); } if (_r$6 && _r$6.$blk !== undefined) { break s; }
-				_tuple$1 = _r$6;
-				segment = _tuple$1[0];
-				_1 = _tuple$1[1];
+			/* while (true) { */ case 10:
+				_r$5 = $recv(_2); /* */ $s = 12; case 12: if($c) { $c = false; _r$5 = _r$5.$blk(); } if (_r$5 && _r$5.$blk !== undefined) { break s; }
+				_tuple = _r$5;
+				segment = _tuple[0];
+				_1 = _tuple[1];
 				if (!_1) {
-					/* break; */ $s = 12; continue;
+					/* break; */ $s = 11; continue;
 				}
 				segment.x = lastSegment.x;
 				segment.y = lastSegment.y;
-			/* } */ $s = 11; continue; case 12:
-		/* } */ case 7:
+			/* } */ $s = 10; continue; case 11:
+		/* } */ case 6:
 		$s = -1; return;
 		return;
-		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.Eat }; } $f.$ptr = $ptr; $f._1 = _1; $f._2 = _2; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._r$6 = _r$6; $f._tuple = _tuple; $f._tuple$1 = _tuple$1; $f.eatme = eatme; $f.imageSize = imageSize; $f.lastSegment = lastSegment; $f.myTail = myTail; $f.oldLength = oldLength; $f.segment = segment; $f.snake = snake; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.Eat }; } $f.$ptr = $ptr; $f._1 = _1; $f._2 = _2; $f._r = _r; $f._r$1 = _r$1; $f._r$2 = _r$2; $f._r$3 = _r$3; $f._r$4 = _r$4; $f._r$5 = _r$5; $f._tuple = _tuple; $f.eatme = eatme; $f.lastSegment = lastSegment; $f.myTail = myTail; $f.oldLength = oldLength; $f.segment = segment; $f.snake = snake; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Snake.prototype.Eat = function(eatme) { return this.$val.Eat(eatme); };
 	Snake.ptr.prototype.EatingTail = function() {
@@ -34615,11 +34951,29 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.GetDrawTail }; } $f.$ptr = $ptr; $f._tuple = _tuple; $f.beginning = beginning; $f.ending = ending; $f.i = i; $f.i$1 = i$1; $f.out = out; $f.snake = snake; $f.x = x; $f.x$1 = x$1; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Snake.prototype.GetDrawTail = function() { return this.$val.GetDrawTail(); };
+	Snake.ptr.prototype.GetImageForSize = function(size) {
+		var $ptr, _entry, _r, _r$1, image, size, snake, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _entry = $f._entry; _r = $f._r; _r$1 = $f._r$1; image = $f.image; size = $f.size; snake = $f.snake; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		snake = this;
+		image = (_entry = snake.image.images[$Int.keyFor(size)], _entry !== undefined ? _entry.v : ptrType.nil);
+		/* */ if (!snake.advanced) { $s = 1; continue; }
+		/* */ $s = 2; continue;
+		/* if (!snake.advanced) { */ case 1:
+			_r = fmt.Println(new sliceType$2([new $String("im not advanced")])); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+			_r;
+			_r$1 = image.Fill((x = color.White, new x.constructor.elem(x))); /* */ $s = 4; case 4: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+			_r$1;
+		/* } */ case 2:
+		$s = -1; return image;
+		return image;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.GetImageForSize }; } $f.$ptr = $ptr; $f._entry = _entry; $f._r = _r; $f._r$1 = _r$1; $f.image = image; $f.size = size; $f.snake = snake; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Snake.prototype.GetImageForSize = function(size) { return this.$val.GetImageForSize(size); };
 	Snake.ptr.prototype.GetMyTail = function() {
 		var $ptr, _tuple, beginning, ending, i, i$1, out, snake, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _tuple = $f._tuple; beginning = $f.beginning; ending = $f.ending; i = $f.i; i$1 = $f.i$1; out = $f.out; snake = $f.snake; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		snake = this;
-		out = new $Chan(ptrType$1, snake.length);
+		out = new $Chan(ptrType$2, snake.length);
 		_tuple = snake.GetSegments();
 		beginning = _tuple[0];
 		ending = _tuple[1];
@@ -34711,9 +35065,31 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.IsColliding }; } $f.$ptr = $ptr; $f._r = _r; $f.edible = edible; $f.me = me; $f.other = other; $f.snake = snake; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Snake.prototype.IsColliding = function(edible) { return this.$val.IsColliding(edible); };
+	Snake.ptr.prototype.ResetToStartSize = function() {
+		var $ptr, _i, _r, _ref, i, snake, x, x$1, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _i = $f._i; _r = $f._r; _ref = $f._ref; i = $f.i; snake = $f.snake; x = $f.x; x$1 = $f.x$1; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		snake = this;
+		snake.size = 8;
+		$r = snake.image.Start(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		_r = snake.GetImageForSize((snake.size >> 0)); /* */ $s = 2; case 2: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		snake.avatar = _r;
+		_ref = snake.positions;
+		_i = 0;
+		while (true) {
+			if (!(_i < _ref.$length)) { break; }
+			i = _i;
+			(x = snake.positions, ((i < 0 || i >= x.$length) ? $throwRuntimeError("index out of range") : x.$array[x.$offset + i])).size = 8;
+			(x$1 = snake.positions, ((i < 0 || i >= x$1.$length) ? $throwRuntimeError("index out of range") : x$1.$array[x$1.$offset + i])).image = snake.avatar;
+			_i++;
+		}
+		$s = -1; return;
+		return;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.ResetToStartSize }; } $f.$ptr = $ptr; $f._i = _i; $f._r = _r; $f._ref = _ref; $f.i = i; $f.snake = snake; $f.x = x; $f.x$1 = x$1; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	Snake.prototype.ResetToStartSize = function() { return this.$val.ResetToStartSize(); };
 	Snake.ptr.prototype.Start = function(position) {
-		var $ptr, _r, _r$1, _tuple, imageSize, position, snake, x, x$1, $s, $r;
-		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; _r$1 = $f._r$1; _tuple = $f._tuple; imageSize = $f.imageSize; position = $f.position; snake = $f.snake; x = $f.x; x$1 = $f.x$1; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		var $ptr, _r, position, snake, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; position = $f.position; snake = $f.snake; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		position = $clone(position, Vector2);
 		snake = this;
 		snake.length = 20;
@@ -34721,16 +35097,14 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		Vector2.copy(snake.position, position);
 		snake.cursor = 0;
 		snake.size = 8;
-		imageSize = (snake.size >> 0);
-		_r = ebiten.NewImage(imageSize, imageSize, 0); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
-		_tuple = _r;
-		snake.avatar = _tuple[0];
-		_r$1 = snake.avatar.Fill((x = color.White, new x.constructor.elem(x))); /* */ $s = 2; case 2: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
-		_r$1;
-		SnakeSegment.copy((x$1 = snake.positions, (0 >= x$1.$length ? $throwRuntimeError("index out of range") : x$1.$array[x$1.$offset + 0])), new SnakeSegment.ptr(snake, $clone(snake.position, Vector2), snake.size, snake.avatar));
+		snake.image = new SnakeImage.ptr(false);
+		$r = snake.image.Start(); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		_r = snake.GetImageForSize((snake.size >> 0)); /* */ $s = 2; case 2: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		snake.avatar = _r;
+		SnakeSegment.copy((x = snake.positions, (0 >= x.$length ? $throwRuntimeError("index out of range") : x.$array[x.$offset + 0])), new SnakeSegment.ptr(snake, $clone(snake.position, Vector2), snake.size, snake.avatar));
 		$s = -1; return;
 		return;
-		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.Start }; } $f.$ptr = $ptr; $f._r = _r; $f._r$1 = _r$1; $f._tuple = _tuple; $f.imageSize = imageSize; $f.position = position; $f.snake = snake; $f.x = x; $f.x$1 = x$1; $f.$s = $s; $f.$r = $r; return $f;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Snake.ptr.prototype.Start }; } $f.$ptr = $ptr; $f._r = _r; $f.position = position; $f.snake = snake; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
 	};
 	Snake.prototype.Start = function(position) { return this.$val.Start(position); };
 	Snake.ptr.prototype.Update = function() {
@@ -34742,6 +35116,28 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		return;
 	};
 	Snake.prototype.Update = function() { return this.$val.Update(); };
+	SnakeImage.ptr.prototype.Start = function() {
+		var $ptr, _key, _q, _r, _r$1, _tuple, i, image, newImage, rb, x, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _key = $f._key; _q = $f._q; _r = $f._r; _r$1 = $f._r$1; _tuple = $f._tuple; i = $f.i; image = $f.image; newImage = $f.newImage; rb = $f.rb; x = $f.x; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		image = this;
+		image.images = {};
+		i = 8;
+		/* while (true) { */ case 1:
+			/* if (!(i <= 32)) { break; } */ if(!(i <= 32)) { $s = 2; continue; }
+			_r = ebiten.NewImage(i, i, 0); /* */ $s = 3; case 3: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+			_tuple = _r;
+			newImage = _tuple[0];
+			rb = ((_q = ($imul(255, ((32 - i >> 0)))) / 32, (_q === _q && _q !== 1/0 && _q !== -1/0) ? _q >> 0 : $throwRuntimeError("integer divide by zero")) << 24 >>> 24);
+			_r$1 = newImage.Fill((x = new color.NRGBA.ptr(rb, 255, rb, 255), new x.constructor.elem(x))); /* */ $s = 4; case 4: if($c) { $c = false; _r$1 = _r$1.$blk(); } if (_r$1 && _r$1.$blk !== undefined) { break s; }
+			_r$1;
+			_key = i; (image.images || $throwRuntimeError("assignment to entry in nil map"))[$Int.keyFor(_key)] = { k: _key, v: newImage };
+			i = i + (2) >> 0;
+		/* } */ $s = 1; continue; case 2:
+		$s = -1; return;
+		return;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: SnakeImage.ptr.prototype.Start }; } $f.$ptr = $ptr; $f._key = _key; $f._q = _q; $f._r = _r; $f._r$1 = _r$1; $f._tuple = _tuple; $f.i = i; $f.image = image; $f.newImage = newImage; $f.rb = rb; $f.x = x; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	SnakeImage.prototype.Start = function() { return this.$val.Start(); };
 	SnakeSegment.ptr.prototype.avatar = function() {
 		var $ptr, seg;
 		seg = $clone(this, SnakeSegment);
@@ -34851,12 +35247,13 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		return new Vector2.ptr(v.y, v.x);
 	};
 	Vector2.prototype.Reverse = function() { return this.$val.Reverse(); };
-	ptrType$2.methods = [{prop: "amount", name: "amount", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [$Int], false)}, {prop: "avatar", name: "avatar", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [ptrType], false)}, {prop: "position", name: "position", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [Vector2], false)}, {prop: "Collider", name: "Collider", pkg: "", typ: $funcType([], [Rect], false)}, {prop: "PlaceRandomly", name: "PlaceRandomly", pkg: "", typ: $funcType([], [], false)}];
-	ptrType$3.methods = [{prop: "MakeApple", name: "MakeApple", pkg: "", typ: $funcType([], [Apple], false)}, {prop: "Start", name: "Start", pkg: "", typ: $funcType([], [], false)}];
-	ptrType$5.methods = [{prop: "ProcessInput", name: "ProcessInput", pkg: "", typ: $funcType([ptrType$4], [$error], false)}];
-	ptrType$4.methods = [{prop: "HandleMovement", name: "HandleMovement", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "End", name: "End", pkg: "", typ: $funcType([$String], [], false)}, {prop: "Update", name: "Update", pkg: "", typ: $funcType([ptrType], [$error], false)}];
+	ptrType$3.methods = [{prop: "amount", name: "amount", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [$Int], false)}, {prop: "avatar", name: "avatar", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [ptrType], false)}, {prop: "position", name: "position", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [Vector2], false)}, {prop: "Collider", name: "Collider", pkg: "", typ: $funcType([], [Rect], false)}, {prop: "PlaceRandomly", name: "PlaceRandomly", pkg: "", typ: $funcType([], [], false)}];
+	ptrType$4.methods = [{prop: "MakeApple", name: "MakeApple", pkg: "", typ: $funcType([], [Apple], false)}, {prop: "MakeEdibleForLevel", name: "MakeEdibleForLevel", pkg: "", typ: $funcType([$Int], [Edible], false)}, {prop: "Start", name: "Start", pkg: "", typ: $funcType([], [], false)}];
+	ptrType$6.methods = [{prop: "ProcessInput", name: "ProcessInput", pkg: "", typ: $funcType([ptrType$5], [$error], false)}, {prop: "WaitForOption", name: "WaitForOption", pkg: "", typ: $funcType([ptrType$5], [], false)}];
+	ptrType$5.methods = [{prop: "HandleMovement", name: "HandleMovement", pkg: "", typ: $funcType([$Int], [], false)}, {prop: "AdvanceLevel", name: "AdvanceLevel", pkg: "", typ: $funcType([ptrType], [], false)}, {prop: "End", name: "End", pkg: "", typ: $funcType([$String], [], false)}, {prop: "Main", name: "Main", pkg: "", typ: $funcType([ptrType], [$error], false)}, {prop: "NextLevel", name: "NextLevel", pkg: "", typ: $funcType([], [], false)}, {prop: "Start", name: "Start", pkg: "", typ: $funcType([], [], false)}, {prop: "Update", name: "Update", pkg: "", typ: $funcType([ptrType], [$error], false)}];
 	Rect.methods = [{prop: "CollidesWith", name: "CollidesWith", pkg: "", typ: $funcType([Rect], [$Bool], false)}];
-	ptrType$6.methods = [{prop: "AddPosition", name: "AddPosition", pkg: "", typ: $funcType([Vector2], [], false)}, {prop: "Collider", name: "Collider", pkg: "", typ: $funcType([], [Rect], false)}, {prop: "Eat", name: "Eat", pkg: "", typ: $funcType([Edible], [], false)}, {prop: "EatingTail", name: "EatingTail", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "GetDrawTail", name: "GetDrawTail", pkg: "", typ: $funcType([], [DrawTail], false)}, {prop: "GetMyTail", name: "GetMyTail", pkg: "", typ: $funcType([], [MyTail], false)}, {prop: "GetSegments", name: "GetSegments", pkg: "", typ: $funcType([], [sliceType$3, sliceType$3], false)}, {prop: "GetColliderAt", name: "GetColliderAt", pkg: "", typ: $funcType([Vector2], [Rect], false)}, {prop: "GetTail", name: "GetTail", pkg: "", typ: $funcType([], [Tail], false)}, {prop: "IsColliding", name: "IsColliding", pkg: "", typ: $funcType([Edible], [$Bool], false)}, {prop: "Start", name: "Start", pkg: "", typ: $funcType([Vector2], [], false)}, {prop: "Update", name: "Update", pkg: "", typ: $funcType([], [], false)}];
+	ptrType$7.methods = [{prop: "AddPosition", name: "AddPosition", pkg: "", typ: $funcType([Vector2], [], false)}, {prop: "Collider", name: "Collider", pkg: "", typ: $funcType([], [Rect], false)}, {prop: "Eat", name: "Eat", pkg: "", typ: $funcType([Edible], [], false)}, {prop: "EatingTail", name: "EatingTail", pkg: "", typ: $funcType([], [$Bool], false)}, {prop: "GetDrawTail", name: "GetDrawTail", pkg: "", typ: $funcType([], [DrawTail], false)}, {prop: "GetImageForSize", name: "GetImageForSize", pkg: "", typ: $funcType([$Int], [ptrType], false)}, {prop: "GetMyTail", name: "GetMyTail", pkg: "", typ: $funcType([], [MyTail], false)}, {prop: "GetSegments", name: "GetSegments", pkg: "", typ: $funcType([], [sliceType$3, sliceType$3], false)}, {prop: "GetColliderAt", name: "GetColliderAt", pkg: "", typ: $funcType([Vector2], [Rect], false)}, {prop: "GetTail", name: "GetTail", pkg: "", typ: $funcType([], [Tail], false)}, {prop: "IsColliding", name: "IsColliding", pkg: "", typ: $funcType([Edible], [$Bool], false)}, {prop: "ResetToStartSize", name: "ResetToStartSize", pkg: "", typ: $funcType([], [], false)}, {prop: "Start", name: "Start", pkg: "", typ: $funcType([Vector2], [], false)}, {prop: "Update", name: "Update", pkg: "", typ: $funcType([], [], false)}];
+	ptrType$1.methods = [{prop: "Start", name: "Start", pkg: "", typ: $funcType([], [], false)}];
 	SnakeSegment.methods = [{prop: "avatar", name: "avatar", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [ptrType], false)}, {prop: "position", name: "position", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [Vector2], false)}];
 	Tail.methods = [{prop: "Skip", name: "Skip", pkg: "", typ: $funcType([$Int], [Tail], false)}];
 	MyTail.methods = [{prop: "Skip", name: "Skip", pkg: "", typ: $funcType([$Int], [MyTail], false)}];
@@ -34866,12 +35263,13 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 	Drawable.init([{prop: "avatar", name: "avatar", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [ptrType], false)}, {prop: "position", name: "position", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [Vector2], false)}]);
 	Edible.init([{prop: "Collider", name: "Collider", pkg: "", typ: $funcType([], [Rect], false)}, {prop: "amount", name: "amount", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [$Int], false)}, {prop: "avatar", name: "avatar", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [ptrType], false)}, {prop: "position", name: "position", pkg: "github.com/mckinnsb/gogosnek", typ: $funcType([], [Vector2], false)}]);
 	InputHandler.init("github.com/mckinnsb/gogosnek", [{prop: "inputDown", name: "inputDown", exported: false, typ: $Bool, tag: ""}]);
-	GameState.init("github.com/mckinnsb/gogosnek", [{prop: "snake", name: "snake", exported: false, typ: Snake, tag: ""}, {prop: "input", name: "input", exported: false, typ: InputHandler, tag: ""}, {prop: "apple", name: "apple", exported: false, typ: Edible, tag: ""}, {prop: "chef", name: "chef", exported: false, typ: Chef, tag: ""}, {prop: "ended", name: "ended", exported: false, typ: $Bool, tag: ""}, {prop: "ticker", name: "ticker", exported: false, typ: $Int, tag: ""}, {prop: "tick", name: "tick", exported: false, typ: $Int, tag: ""}, {prop: "score", name: "score", exported: false, typ: $Int, tag: ""}, {prop: "endMessage", name: "endMessage", exported: false, typ: $String, tag: ""}]);
+	GameState.init("github.com/mckinnsb/gogosnek", [{prop: "snake", name: "snake", exported: false, typ: Snake, tag: ""}, {prop: "input", name: "input", exported: false, typ: InputHandler, tag: ""}, {prop: "coroutine", name: "coroutine", exported: false, typ: funcType, tag: ""}, {prop: "coroutineStart", name: "coroutineStart", exported: false, typ: $Int, tag: ""}, {prop: "chef", name: "chef", exported: false, typ: Chef, tag: ""}, {prop: "edibles", name: "edibles", exported: false, typ: sliceType$4, tag: ""}, {prop: "ended", name: "ended", exported: false, typ: $Bool, tag: ""}, {prop: "frozen", name: "frozen", exported: false, typ: $Bool, tag: ""}, {prop: "level", name: "level", exported: false, typ: $Int, tag: ""}, {prop: "ticker", name: "ticker", exported: false, typ: $Int, tag: ""}, {prop: "tick", name: "tick", exported: false, typ: $Int, tag: ""}, {prop: "score", name: "score", exported: false, typ: $Int, tag: ""}, {prop: "running", name: "running", exported: false, typ: $Bool, tag: ""}, {prop: "endMessage", name: "endMessage", exported: false, typ: $String, tag: ""}]);
 	Rect.init("github.com/mckinnsb/gogosnek", [{prop: "start", name: "start", exported: false, typ: Vector2, tag: ""}, {prop: "end", name: "end", exported: false, typ: Vector2, tag: ""}]);
-	Snake.init("github.com/mckinnsb/gogosnek", [{prop: "advanced", name: "advanced", exported: false, typ: $Bool, tag: ""}, {prop: "avatar", name: "avatar", exported: false, typ: ptrType, tag: ""}, {prop: "position", name: "position", exported: false, typ: Vector2, tag: ""}, {prop: "direction", name: "direction", exported: false, typ: Vector2, tag: ""}, {prop: "positions", name: "positions", exported: false, typ: sliceType$3, tag: ""}, {prop: "cursor", name: "cursor", exported: false, typ: $Int, tag: ""}, {prop: "speed", name: "speed", exported: false, typ: $Float64, tag: ""}, {prop: "length", name: "length", exported: false, typ: $Int, tag: ""}, {prop: "size", name: "size", exported: false, typ: $Float64, tag: ""}]);
-	SnakeSegment.init("github.com/mckinnsb/gogosnek", [{prop: "snake", name: "snake", exported: false, typ: ptrType$6, tag: ""}, {prop: "center", name: "center", exported: false, typ: Vector2, tag: ""}, {prop: "size", name: "size", exported: false, typ: $Float64, tag: ""}, {prop: "image", name: "image", exported: false, typ: ptrType, tag: ""}]);
+	Snake.init("github.com/mckinnsb/gogosnek", [{prop: "advanced", name: "advanced", exported: false, typ: $Bool, tag: ""}, {prop: "avatar", name: "avatar", exported: false, typ: ptrType, tag: ""}, {prop: "image", name: "image", exported: false, typ: ptrType$1, tag: ""}, {prop: "position", name: "position", exported: false, typ: Vector2, tag: ""}, {prop: "direction", name: "direction", exported: false, typ: Vector2, tag: ""}, {prop: "positions", name: "positions", exported: false, typ: sliceType$3, tag: ""}, {prop: "cursor", name: "cursor", exported: false, typ: $Int, tag: ""}, {prop: "speed", name: "speed", exported: false, typ: $Float64, tag: ""}, {prop: "length", name: "length", exported: false, typ: $Int, tag: ""}, {prop: "size", name: "size", exported: false, typ: $Float64, tag: ""}]);
+	SnakeImage.init("github.com/mckinnsb/gogosnek", [{prop: "images", name: "images", exported: false, typ: mapType, tag: ""}]);
+	SnakeSegment.init("github.com/mckinnsb/gogosnek", [{prop: "snake", name: "snake", exported: false, typ: ptrType$7, tag: ""}, {prop: "center", name: "center", exported: false, typ: Vector2, tag: ""}, {prop: "size", name: "size", exported: false, typ: $Float64, tag: ""}, {prop: "image", name: "image", exported: false, typ: ptrType, tag: ""}]);
 	Tail.init(Vector2, false, false);
-	MyTail.init(ptrType$1, false, false);
+	MyTail.init(ptrType$2, false, false);
 	DrawTail.init(Drawable, false, false);
 	Vector2.init("github.com/mckinnsb/gogosnek", [{prop: "x", name: "x", exported: false, typ: $Float64, tag: ""}, {prop: "y", name: "y", exported: false, typ: $Float64, tag: ""}]);
 	$init = function() {
@@ -34883,12 +35281,13 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		$r = color.$init(); /* */ $s = 4; case 4: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = math.$init(); /* */ $s = 5; case 5: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 		$r = rand.$init(); /* */ $s = 6; case 6: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
-		/* */ if ($pkg === $mainPkg) { $s = 7; continue; }
-		/* */ $s = 8; continue;
-		/* if ($pkg === $mainPkg) { */ case 7:
-			$r = main(); /* */ $s = 9; case 9: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$r = time.$init(); /* */ $s = 7; case 7: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		/* */ if ($pkg === $mainPkg) { $s = 8; continue; }
+		/* */ $s = 9; continue;
+		/* if ($pkg === $mainPkg) { */ case 8:
+			$r = main(); /* */ $s = 10; case 10: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
 			$mainFinished = true;
-		/* } */ case 8:
+		/* } */ case 9:
 		/* */ } return; } if ($f === undefined) { $f = { $blk: $init }; } $f.$s = $s; $f.$r = $r; return $f;
 	};
 	$pkg.$init = $init;

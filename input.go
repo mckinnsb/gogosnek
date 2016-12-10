@@ -74,3 +74,22 @@ func (input *InputHandler) ProcessInput(game *GameState) error {
 
 	return nil
 }
+
+func (input *InputHandler) WaitForOption(game *GameState) {
+
+	keyPressed := false
+
+	switch {
+
+	case ebiten.IsKeyPressed(ebiten.KeyY) || ebiten.IsKeyPressed(ebiten.KeyEnter):
+		game.snake.advanced = true
+		keyPressed = true
+
+	case ebiten.IsKeyPressed(ebiten.KeyN):
+		keyPressed = true
+	}
+
+	if keyPressed {
+		game.Start()
+	}
+}

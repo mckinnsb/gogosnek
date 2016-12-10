@@ -15,7 +15,21 @@ func (chef *Chef) MakeApple() Apple {
 	return apple
 }
 
+func (chef *Chef) MakeEdibleForLevel(level int) Edible {
+	var edible Edible
+
+	switch level {
+	case 0:
+		apple := chef.MakeApple()
+		apple.PlaceRandomly()
+		edible = &apple
+	}
+
+	return edible
+}
+
 //start sets up the images for all the edibles
+
 func (chef *Chef) Start() {
 
 	//we create this just once, because it is a heavy struct
