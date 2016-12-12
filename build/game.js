@@ -4232,7 +4232,7 @@ $packages["github.com/gopherjs/gopherjs/nosync"] = (function() {
 	return $pkg;
 })();
 $packages["time"] = (function() {
-	var $pkg = {}, $init, errors, js, nosync, runtime, syscall, ParseError, Time, Month, Weekday, Duration, Location, zone, zoneTrans, sliceType, sliceType$1, ptrType, sliceType$2, structType, arrayType, sliceType$3, arrayType$1, arrayType$2, ptrType$1, arrayType$4, ptrType$3, ptrType$6, std0x, longDayNames, shortDayNames, shortMonthNames, longMonthNames, atoiError, errBad, errLeadingInt, months, days, daysBefore, utcLoc, utcLoc$24ptr, localLoc, localLoc$24ptr, localOnce, zoneinfo, badData, zoneDirs, _tuple, _r, init, initLocal, Sleep, indexByte, startsWithLowerCase, nextStdChunk, match, lookup, appendInt, atoi, formatNano, quote, isDigit, getnum, cutspace, skip, Parse, parse, parseTimeZone, parseGMT, parseNanoseconds, leadingInt, absWeekday, absClock, fmtFrac, fmtInt, absDate, daysIn, Unix, isLeap, norm, Date, div, FixedZone;
+	var $pkg = {}, $init, errors, js, nosync, runtime, syscall, ParseError, Time, Month, Weekday, Duration, Location, zone, zoneTrans, sliceType, sliceType$1, ptrType, sliceType$2, structType, arrayType, sliceType$3, arrayType$1, arrayType$2, ptrType$1, arrayType$4, ptrType$3, ptrType$6, std0x, longDayNames, shortDayNames, shortMonthNames, longMonthNames, atoiError, errBad, errLeadingInt, months, days, daysBefore, utcLoc, utcLoc$24ptr, localLoc, localLoc$24ptr, localOnce, zoneinfo, badData, zoneDirs, _tuple, _r, init, initLocal, runtimeNano, now, Sleep, indexByte, startsWithLowerCase, nextStdChunk, match, lookup, appendInt, atoi, formatNano, quote, isDigit, getnum, cutspace, skip, Parse, parse, parseTimeZone, parseGMT, parseNanoseconds, leadingInt, absWeekday, absClock, fmtFrac, fmtInt, absDate, daysIn, Now, Unix, isLeap, norm, Date, div, FixedZone;
 	errors = $packages["errors"];
 	js = $packages["github.com/gopherjs/gopherjs/js"];
 	nosync = $packages["github.com/gopherjs/gopherjs/nosync"];
@@ -4342,6 +4342,21 @@ $packages["time"] = (function() {
 		}
 		localLoc.name = $substring(s, (i + 1 >> 0), j);
 		localLoc.zone = new sliceType([new zone.ptr(localLoc.name, $imul(($parseInt(d.getTimezoneOffset()) >> 0), -60), false)]);
+	};
+	runtimeNano = function() {
+		var $ptr;
+		return $mul64($internalize(new ($global.Date)().getTime(), $Int64), new $Int64(0, 1000000));
+	};
+	now = function() {
+		var $ptr, _tmp, _tmp$1, n, nsec, sec, x;
+		sec = new $Int64(0, 0);
+		nsec = 0;
+		n = runtimeNano();
+		_tmp = $div64(n, new $Int64(0, 1000000000), false);
+		_tmp$1 = ((x = $div64(n, new $Int64(0, 1000000000), true), x.$low + ((x.$high >> 31) * 4294967296)) >> 0);
+		sec = _tmp;
+		nsec = _tmp$1;
+		return [sec, nsec];
 	};
 	Sleep = function(d) {
 		var $ptr, _r$1, c, d, x, $s, $r;
@@ -6202,6 +6217,14 @@ $packages["time"] = (function() {
 		}
 		return ((((m < 0 || m >= daysBefore.length) ? $throwRuntimeError("index out of range") : daysBefore[m]) - (x = m - 1 >> 0, ((x < 0 || x >= daysBefore.length) ? $throwRuntimeError("index out of range") : daysBefore[x])) >> 0) >> 0);
 	};
+	Now = function() {
+		var $ptr, _tuple$1, nsec, sec;
+		_tuple$1 = now();
+		sec = _tuple$1[0];
+		nsec = _tuple$1[1];
+		return new Time.ptr(new $Int64(sec.$high + 14, sec.$low + 2006054656), nsec, $pkg.Local);
+	};
+	$pkg.Now = Now;
 	Time.ptr.prototype.UTC = function() {
 		var $ptr, t;
 		t = $clone(this, Time);
@@ -33695,7 +33718,7 @@ $packages["github.com/hajimehoshi/ebiten/ebitenutil"] = (function() {
 	return $pkg;
 })();
 $packages["math/rand"] = (function() {
-	var $pkg = {}, $init, nosync, math, Source, Rand, lockedSource, rngSource, arrayType, ptrType, ptrType$1, sliceType, ptrType$2, ptrType$3, sliceType$1, ptrType$5, ke, we, fe, kn, wn, fn, globalRand, rng_cooked, absInt32, NewSource, New, read, Intn, seedrand;
+	var $pkg = {}, $init, nosync, math, Source, Rand, lockedSource, rngSource, arrayType, ptrType, ptrType$1, sliceType, ptrType$2, ptrType$3, sliceType$1, ptrType$5, ke, we, fe, kn, wn, fn, globalRand, rng_cooked, absInt32, NewSource, New, read, Seed, Intn, seedrand;
 	nosync = $packages["github.com/gopherjs/gopherjs/nosync"];
 	math = $packages["math"];
 	Source = $pkg.Source = $newType(8, $kindInterface, "rand.Source", true, "math/rand", true, null);
@@ -34086,6 +34109,15 @@ $packages["math/rand"] = (function() {
 		return [n, err];
 		/* */ } return; } if ($f === undefined) { $f = { $blk: read }; } $f.$ptr = $ptr; $f._r = _r; $f.err = err; $f.int63 = int63; $f.n = n; $f.p = p; $f.pos = pos; $f.readPos = readPos; $f.readVal = readVal; $f.val = val; $f.$s = $s; $f.$r = $r; return $f;
 	};
+	Seed = function(seed) {
+		var $ptr, seed, $s, $r;
+		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; seed = $f.seed; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
+		$r = globalRand.Seed(seed); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		$s = -1; return;
+		return;
+		/* */ } return; } if ($f === undefined) { $f = { $blk: Seed }; } $f.$ptr = $ptr; $f.seed = seed; $f.$s = $s; $f.$r = $r; return $f;
+	};
+	$pkg.Seed = Seed;
 	Intn = function(n) {
 		var $ptr, _r, n, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; n = $f.n; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
@@ -34817,7 +34849,8 @@ $packages["github.com/mckinnsb/gogosnek"] = (function() {
 		var $ptr, _r, game, $s, $r;
 		/* */ $s = 0; var $f, $c = false; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $ptr = $f.$ptr; _r = $f._r; game = $f.game; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
 		game = new GameState.ptr(new Snake.ptr(false, ptrType.nil, ptrType$1.nil, new Vector2.ptr(0, 0), new Vector2.ptr(1, 0), sliceType$3.nil, 0, 2, 0, 0), new InputHandler.ptr(false), $throwNilPointerError, 0, new Chef.ptr(ptrType.nil), $makeSlice(sliceType$4, 10), false, false, 0, 1, 0, 0, false, "");
-		_r = ebiten.Run($methodVal(game, "Main"), 320, 240, 2, "Go Go Snek!"); /* */ $s = 1; case 1: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
+		$r = rand.Seed(time.Now().Unix()); /* */ $s = 1; case 1: if($c) { $c = false; $r = $r.$blk(); } if ($r && $r.$blk !== undefined) { break s; }
+		_r = ebiten.Run($methodVal(game, "Main"), 320, 240, 2, "Go Go Snek!"); /* */ $s = 2; case 2: if($c) { $c = false; _r = _r.$blk(); } if (_r && _r.$blk !== undefined) { break s; }
 		_r;
 		$s = -1; return;
 		return;

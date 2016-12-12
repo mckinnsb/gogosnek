@@ -6,6 +6,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"math"
+	"math/rand"
 	"time"
 )
 
@@ -174,6 +175,8 @@ func main() {
 		chef:    Chef{},
 		edibles: make([]Edible, 10),
 		ticker:  1}
+
+	rand.Seed(time.Now().Unix())
 
 	ebiten.Run(
 		game.Main,
